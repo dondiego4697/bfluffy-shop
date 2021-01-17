@@ -1,0 +1,54 @@
+{
+    "root": true,
+    "env": {
+        "node": true
+    },
+    "extends": [
+        "eslint:recommended"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 2020
+    },
+    "overrides": [
+        {
+            "files": ["**/*.ts"],
+            "parser": "@typescript-eslint/parser",
+            "plugins": [
+                "@typescript-eslint",
+                "prettier"
+            ],
+            "extends": [
+                "plugin:@typescript-eslint/recommended",
+                "plugin:prettier/recommended",
+                "prettier",
+                "prettier/@typescript-eslint"
+            ],
+            "rules": {
+                "@typescript-eslint/explicit-module-boundary-types": "off",
+                "quotes": ["error", "single", {"avoidEscape": true}],
+                "max-len": [
+                    "error",
+                    {
+                        "code": 120,
+                        "tabWidth": 4,
+                        "ignoreUrls": true,
+                        "ignorePattern": "^import"
+                    }
+                ],
+                "padding-line-between-statements": [
+                    "error",
+                    {"blankLine": "always", "prev": "directive", "next": "*"},
+                    {"blankLine": "any", "prev": "directive", "next": "directive"},
+
+                    {"blankLine": "always", "prev": ["const", "let", "var"], "next": "*"},
+                    {"blankLine": "any", "prev": "*", "next": ["const", "let", "var"]},
+
+                    {"blankLine": "always", "prev": "*", "next": "return"},
+                    {"blankLine": "always", "prev": "*", "next": "continue"},
+
+                    {"blankLine": "always", "prev": "if", "next": "*"}
+                ]
+            }
+        }
+    ]
+}
