@@ -10,6 +10,8 @@ const loggerFormat = printf((data) => {
                 return `${key}=${JSON.stringify(value)}`;
             }
 
+            // TODO filter headers
+
             return `${key}=${value}`;
         })
         .join('\t');

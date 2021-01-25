@@ -4,5 +4,4 @@ export const commands = {
     'compile:server': 'cli/api/compile/server',
 
     'dev:server': 'cli/api/dev/server'
-    
 } as const;

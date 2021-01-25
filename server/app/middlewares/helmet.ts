@@ -5,7 +5,6 @@ import {directives} from 'app/csp';
 
 export const helmet = [
     (req: Request, _res: Response, next: NextFunction): void => {
-        throw new Error('asd');
         req.nonce = randomBytes(16).toString('base64');
         next();
     },
