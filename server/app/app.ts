@@ -8,14 +8,14 @@ import path from 'path';
 import bodyParser from 'body-parser';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import {renderHTML} from 'app/middlewares/render-html';
-import {router as staticRouter} from 'app/middlewares/static';
-import {ping} from 'app/middlewares/ping';
-import {csrf} from 'app/middlewares/csrf';
-import {helmet} from 'app/middlewares/helmet';
-import {cors} from 'app/middlewares/cors';
-import {requestId} from 'app/middlewares/request-id';
-import {logger as loggerMiddleware} from 'app/middlewares/logger';
+import {renderHTML} from 'app/middleware/render-html';
+import {router as staticRouter} from 'app/middleware/static';
+import {ping} from 'app/middleware/ping';
+import {helmet} from 'app/middleware/helmet';
+import {cors} from 'app/middleware/cors';
+import {requestId} from 'app/middleware/request-id';
+import {logger as loggerMiddleware} from 'app/middleware/logger';
+import {router as v1} from 'app/api/v1';
 
 const bodyParserJson = bodyParser.json({
     limit: '5mb',
@@ -35,7 +35,7 @@ export const app = express()
     .use(bodyParserJson)
     .get('/ping', ping)
     .use(staticRouter)
-    .use('/api', [csrf])
+    .use('/api/v1', v1)
     .get('/*', renderHTML)
     .use((_req, _res, next) => next(Boom.notFound('endpoint not found')))
     // eslint-disable-next-line

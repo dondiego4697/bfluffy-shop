@@ -7,10 +7,12 @@ export class PostRefactoring1611559767169 implements MigrationInterface {
             CREATE TABLE "users" (
                 id BIGSERIAL NOT NULL,
                 phone TEXT NOT NULL,
-                code TEXT NOT NULL,
-                last_sms TIMESTAMP WITH TIME ZONE DEFAULT now(),
+                
+                last_sms_code INTEGER NOT NULL,
+                last_sms_code_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-                last_session_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+
                 CONSTRAINT pk_users PRIMARY KEY (id),
                 CONSTRAINT uq_users_phone UNIQUE (phone)
             )

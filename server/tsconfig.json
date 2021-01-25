@@ -20,7 +20,7 @@
         "pretty": true,
         "paths": {
             "app/*": ["./app/*"],
-            "$logger/*": ["./services/logger/*"]
+            "$logger/*": ["service/logger/*"]
         },
         "types": ["node", "express", "jest"],
         "plugins": [{"transform": "@zerollup/ts-transform-paths"}]
@@ -28,7 +28,7 @@
     "include": [
         "./@types/**/*",
         "./app/**/*",
-        "./services/**/*"
+        "service/**/*"
     ],
     "exclude": ["out", "node_modules"]
 }

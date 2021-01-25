@@ -5,7 +5,7 @@ export function cors(req: Request, res: Response) {
     const origin = req.headers.origin || '';
     const allowedOrigins = config['cors.allowedOrigins'];
 
-    if (allowedOrigins && !allowedOrigins.includes(origin)) {
+    if (Array.isArray(origin) || (allowedOrigins && !allowedOrigins.includes(origin))) {
         throw new Error('unsupported origin in this request');
     }
 
