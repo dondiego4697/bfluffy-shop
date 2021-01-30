@@ -16,10 +16,15 @@
         "esModuleInterop": true,
         "sourceMap": true,
         "preserveWatchOutput": true,
+
         "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "strictPropertyInitialization": false,
+
         "pretty": true,
         "paths": {
             "app/*": ["./app/*"],
+            "$db/entity/*": ["./db-entity/*"],
             "$logger/*": ["service/logger/*"]
         },
         "types": ["node", "express", "jest"],
@@ -28,6 +33,7 @@
     "include": [
         "./@types/**/*",
         "./app/**/*",
+        "./db-entity/**/*",
         "service/**/*"
     ],
     "exclude": ["out", "node_modules"]

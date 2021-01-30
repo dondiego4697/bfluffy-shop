@@ -1,0 +1,1 @@
+{"version":3,"file":"ping.js","sourceRoot":"","sources":["../../../../server/app/middleware/ping.ts"],"names":[],"mappings":";;;AACA,uDAAsC;AAEzB,QAAA,IAAI,GAAG,uBAAI,CAAoB,KAAK,EAAE,IAAI,EAAE,GAAG,EAAE,EAAE;IAC5D,GAAG,CAAC,GAAG,EAAE,CAAC;AACd,CAAC,CAAC,CAAC"}
