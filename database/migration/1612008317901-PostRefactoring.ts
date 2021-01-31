@@ -14,13 +14,13 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
                 END;
                 $$ language 'plpgsql';
 
-            CREATE TABLE good_type (
+            CREATE TABLE good_category (
                 id SERIAL NOT NULL,
                 code TEXT NOT NULL,
                 display_name TEXT NOT NULL,
 
-                CONSTRAINT pk_good_type PRIMARY KEY (id),
-                CONSTRAINT uq_good_type_code UNIQUE (code)
+                CONSTRAINT pk_good_category PRIMARY KEY (id),
+                CONSTRAINT uq_good_category_code UNIQUE (code)
             );
 
             CREATE TABLE brand (
@@ -44,7 +44,7 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
             CREATE TABLE catalog (
                 id BIGSERIAL NOT NULL,
 
-                good_type_id INTEGER NOT NULL,
+                good_category_id INTEGER NOT NULL,
                 brand_id INTEGER NOT NULL,
                 pet_category_id INTEGER NOT NULL,
 
@@ -57,7 +57,7 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
 
                 CONSTRAINT pk_catalog PRIMARY KEY (id),
-                CONSTRAINT fk_catalog_good_type_id_good_type FOREIGN KEY(good_type_id) REFERENCES good_type (id),
+                CONSTRAINT fk_catalog_good_category_id_good_category FOREIGN KEY(good_category_id) REFERENCES good_category (id),
                 CONSTRAINT fk_catalog_brand_id_brand FOREIGN KEY(brand_id) REFERENCES brand (id),
                 CONSTRAINT fk_catalog_pet_category_id_pet_category FOREIGN KEY(pet_category_id) REFERENCES pet_category (id)
             );
@@ -118,7 +118,7 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
 
             DROP TABLE pet_category;
             DROP TABLE brand;
-            DROP TABLE good_type;
+            DROP TABLE good_category;
 
             DROP FUNCTION updated_at_column_f;
         `);
