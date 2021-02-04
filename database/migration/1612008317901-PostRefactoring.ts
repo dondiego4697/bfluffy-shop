@@ -5,6 +5,7 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
             CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+            CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
             CREATE OR REPLACE FUNCTION updated_at_column_f()
                 RETURNS TRIGGER AS $$
@@ -51,7 +52,8 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
                 display_name TEXT,
                 description TEXT,
                 rating REAL DEFAULT 0,
-                photo_url TEXT,
+                manufacturer JSONB NOT NULL DEFAULT '{}'::jsonb,
+                photo_url TEXT[],
 
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
@@ -74,7 +76,8 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
 
                 catalog_id BIGINT NOT NULL,
 
-                weight REAL NOT NULL,
+                params JSONB NOT NULL DEFAULT '{}'::jsonb,
+
                 public_id UUID NOT NULL DEFAULT uuid_generate_v1(),
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
 
@@ -82,6 +85,8 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
                 CONSTRAINT fk_catalog_item_catalog_id_catalog FOREIGN KEY(catalog_id) REFERENCES catalog (id),
                 CONSTRAINT uq_catalog_item_public_id UNIQUE (public_id)
             );
+
+            CREATE UNIQUE INDEX uq_catalog_item_catalog_id_params ON catalog_item (catalog_id, digest(params::text, 'sha256'));
 
             CREATE TABLE storage (
                 id BIGSERIAL NOT NULL,
@@ -95,7 +100,8 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
 
                 CONSTRAINT pk_storage PRIMARY KEY (id),
-                CONSTRAINT fk_storage_catalog_item_id_catalog_item FOREIGN KEY(catalog_item_id) REFERENCES catalog_item (id)
+                CONSTRAINT fk_storage_catalog_item_id_catalog_item FOREIGN KEY(catalog_item_id) REFERENCES catalog_item (id),
+                CONSTRAINT uq_storage_catalog_item_id_cost_quantity UNIQUE (catalog_item_id, cost, quantity)
             );
 
             CREATE TRIGGER
@@ -111,6 +117,8 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
         await queryRunner.query(`
             DROP TRIGGER update_storage_updated_at_trigger ON storage;
             DROP TRIGGER update_catalog_updated_at_trigger ON catalog;
+
+            DROP INDEX uq_catalog_item_catalog_id_params;
 
             DROP TABLE storage;
             DROP TABLE catalog_item;
