@@ -3,29 +3,12 @@ import {csrf} from 'app/middleware/csrf';
 import {router as orderRouter} from 'app/api/v1/routers/order';
 import {router as searchRouter} from 'app/api/v1/routers/search';
 import {router as smsRouter} from 'app/api/v1/routers/sms';
-
-// 1. Полнотекстовый поиск + suggest
-// - категории товара
-// - бренд
-// - категории животных
-// - название корма
-
-// 2. создать заказ
-// 2.1 отправить смс с кодом на телефон
-
-// 3. карточка заказа
-
-// 4. Простой поиск по фильтрам
-// - категории корма
-// - бренд
-// - категории животных
-// - цена
-
-// 5. список похожих товаров рандомно
+import {router as catalogRouter} from 'app/api/v1/routers/catalog';
 
 export const router = express
     .Router()
-    // TODO сделать middleware которая проверяет rps по ip, ratelimiter по простому если
+    // TODO стоит посмотреть эластик search
+    .use('/catalog', catalogRouter)
     .use('/search', searchRouter)
     .use('/sms', smsRouter)
     .use(csrf)

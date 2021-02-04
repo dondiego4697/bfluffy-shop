@@ -21,6 +21,7 @@ export const router = express
         })
     )
     // TODO отправлять смс с кодом только раз в 30 секунд
+    // Проверяем по базе последнее высланное смс и если не ок, то возвращаем сколько осталось
     .post('/send', bodyValidate(sendSchema))
     // TODO при успешной верификации создаем в куках токен на 1h CSRF.generateToken
     .post('/verify', bodyValidate(verifySchema));

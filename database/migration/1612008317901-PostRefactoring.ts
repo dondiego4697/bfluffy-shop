@@ -88,6 +88,8 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
 
             CREATE UNIQUE INDEX uq_catalog_item_catalog_id_params ON catalog_item (catalog_id, digest(params::text, 'sha256'));
 
+            CREATE INDEX catalog_item_public_id_idx ON catalog_item (public_id);
+
             CREATE TABLE storage (
                 id BIGSERIAL NOT NULL,
 
@@ -119,6 +121,7 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
             DROP TRIGGER update_catalog_updated_at_trigger ON catalog;
 
             DROP INDEX uq_catalog_item_catalog_id_params;
+            DROP INDEX catalog_item_public_id_idx;
 
             DROP TABLE storage;
             DROP TABLE catalog_item;
