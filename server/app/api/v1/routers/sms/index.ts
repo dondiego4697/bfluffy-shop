@@ -2,8 +2,10 @@ import * as express from 'express';
 import * as Joi from '@hapi/joi';
 import ratelimiter from 'express-rate-limit';
 import {bodyValidate} from 'app/middleware/validate';
+import {sendCode} from 'api-v1/routers/sms/send-code';
+import {verifyCode} from 'app/api/v1/routers/sms/verify-code';
 
-const sendSchema = Joi.object({
+const sendCodeSchema = Joi.object({
     phone: Joi.number().required()
 });
 
@@ -20,8 +22,5 @@ export const router = express
             max: 10 // Максимум 10 запросов за 1h на IP
         })
     )
-    // TODO отправлять смс с кодом только раз в 30 секунд
-    // Проверяем по базе последнее высланное смс и если не ок, то возвращаем сколько осталось
-    .post('/send', bodyValidate(sendSchema))
-    // TODO при успешной верификации создаем в куках токен на 1h CSRF.generateToken
-    .post('/verify', bodyValidate(verifySchema));
+    .post('/send_code', bodyValidate(sendCodeSchema), sendCode)
+    .post('/verify_code', bodyValidate(verifySchema), verifyCode);

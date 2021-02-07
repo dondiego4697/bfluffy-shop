@@ -12,8 +12,12 @@ interface DB {
 export interface Config {
     'logger.colorize': boolean;
     'logger.level': string;
+    'csrf.enable': boolean;
+    'csrf.token.ttl': number;
     'cors.allowedOrigins': string[] | null;
     'header.requestId': string;
+    'app.cache.enable': boolean;
+    'app.host': string;
     db: DB;
 }
 
@@ -22,6 +26,10 @@ const production: Config = {
     'logger.level': 'info',
     'cors.allowedOrigins': [],
     'header.requestId': 'x-request-id',
+    'csrf.enable': true,
+    'csrf.token.ttl': 60 * 60 * 1000, // 1h
+    'app.cache.enable': true,
+    'app.host': 'https://some_host.ru',
     db: {
         hosts: ['localhost'],
         port: 6432,
@@ -43,6 +51,8 @@ const development: Config = {
     'logger.colorize': true,
     'logger.level': 'silly',
     'cors.allowedOrigins': null,
+    'csrf.enable': false,
+    'app.cache.enable': false,
     db: {
         ...testing.db,
         hosts: ['localhost'],
@@ -54,7 +64,8 @@ const development: Config = {
 };
 
 const tests: Config = {
-    ...development
+    ...development,
+    'csrf.enable': true
 };
 
 const configs = new Map<string, Readonly<Config>>([

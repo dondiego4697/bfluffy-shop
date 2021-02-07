@@ -1,10 +1,8 @@
-import {createConnection, Connection} from 'typeorm';
+import {createConnection, getConnection} from 'typeorm';
 import {config} from 'app/config';
-import {Brand} from '$db/entity/brand';
+import {Brand, Catalog, GoodCategory, OrderPosition, Order, PetCategory, Storage, User} from '$db/entity/index';
 
-// TODO master/replice
 class DbManager {
-    protected masterConnection: Connection | undefined;
     public isActive = false;
 
     constructor() {
@@ -12,17 +10,40 @@ class DbManager {
     }
 
     protected async init() {
-        this.masterConnection = await createConnection({
+        // TODO master/replice
+        await createConnection({
             type: 'postgres',
-            host: config.db.hosts[0],
-            port: config.db.port,
-            username: config.db.username,
-            password: config.db.password,
-            database: config.db.database,
-            entities: [Brand]
+            replication: {
+                master: {
+                    host: config.db.hosts[0],
+                    port: config.db.port,
+                    username: config.db.username,
+                    password: config.db.password,
+                    database: config.db.database
+                },
+                slaves: [
+                    {
+                        host: config.db.hosts[0],
+                        port: config.db.port,
+                        username: config.db.username,
+                        password: config.db.password,
+                        database: config.db.database
+                    }
+                ]
+            },
+            entities: [Brand, Catalog, GoodCategory, OrderPosition, Order, PetCategory, Storage, User],
+            logging: 'all',
+            maxQueryExecutionTime: 5000,
+            extra: {
+                connectionLimit: 100
+            }
         });
 
         this.isActive = true;
+    }
+
+    public getConnection() {
+        return getConnection();
     }
 }
 

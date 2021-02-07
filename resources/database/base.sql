@@ -14,4 +14,5 @@ INSERT INTO good_category (code, display_name) VALUES
     
 
 INSERT INTO brand (code, display_name) VALUES 
-    ();
+    ('purina_pro_plan', 'Purina Pro Plan'),
+    ('royal_canin', 'Royal Canin');

@@ -3,16 +3,25 @@ import {config} from 'app/config';
 
 const {printf} = format;
 
-const loggerFormat = printf((data) => {
+const loggerFormat = printf((rawData) => {
+    const {message, level, timestamp, ...other} = rawData;
+    const data = {level, timestamp, ...other};
+
+    if (typeof message === 'object') {
+        Object.assign(data, message);
+    } else {
+        Object.assign(data, {message});
+    }
+
     return Object.entries(data)
-        .map(([key, value]) => {
-            if (typeof value === 'object') {
-                return `${key}=${JSON.stringify(value)}`;
+        .map(([k, v]) => {
+            if (typeof v === 'object') {
+                return `${k}=${JSON.stringify(v)}`;
             }
 
             // TODO filter headers
 
-            return `${key}=${value}`;
+            return `${k}=${v}`;
         })
         .join('\t');
 });

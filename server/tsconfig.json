@@ -24,8 +24,10 @@
         "pretty": true,
         "paths": {
             "app/*": ["./app/*"],
+            "api-v1/*": ["./app/api/v1/*"],
             "$db/entity/*": ["./db-entity/*"],
-            "$logger/*": ["service/logger/*"]
+            "$logger/*": ["service/logger/*"],
+            "$sms/*": ["service/sms/*"]
         },
         "types": ["node", "express", "jest"],
         "plugins": [{"transform": "@zerollup/ts-transform-paths"}]

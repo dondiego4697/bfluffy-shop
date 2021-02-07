@@ -2,7 +2,7 @@ import {Entity, PrimaryGeneratedColumn, Column, OneToMany} from 'typeorm';
 import {Catalog} from '$db/entity/index';
 
 @Entity()
-export class Brand {
+export class PetCategory {
     @PrimaryGeneratedColumn()
     id: number;
 
