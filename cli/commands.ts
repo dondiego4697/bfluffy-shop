@@ -1,7 +1,7 @@
 export const commands = {
-    'lint': 'cli/api/lint',
+    lint: 'cli/api/lint',
+    tests: 'cli/api/tests',
 
-    'compile:server': 'cli/api/compile/server',
-
-    'dev:server': 'cli/api/dev/server'
+    'server:compile': 'cli/api/server/compile',
+    'server:dev': 'cli/api/server/dev'
 } as const;

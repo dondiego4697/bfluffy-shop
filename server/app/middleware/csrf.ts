@@ -11,6 +11,7 @@ export const csrf = wrap<Request, Response>(async (req, res, next) => {
 
     if (CSRF.isTokenValid(req)) {
         res.cookie('csrf_token', CSRF.generateToken(), {maxAge: config['csrf.token.ttl']});
+
         return next();
     }
 

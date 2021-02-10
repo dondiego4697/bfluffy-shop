@@ -18,10 +18,12 @@ export interface Config {
     'header.requestId': string;
     'app.cache.enable': boolean;
     'app.host': string;
+    'tests.enable': boolean;
     db: DB;
 }
 
 const production: Config = {
+    'tests.enable': false,
     'logger.colorize': false,
     'logger.level': 'info',
     'cors.allowedOrigins': [],
@@ -65,7 +67,13 @@ const development: Config = {
 
 const tests: Config = {
     ...development,
-    'csrf.enable': true
+    'tests.enable': true,
+    'csrf.enable': true,
+    'app.cache.enable': false,
+    db: {
+        ...development.db,
+        database: 'petstore_test'
+    }
 };
 
 const configs = new Map<string, Readonly<Config>>([

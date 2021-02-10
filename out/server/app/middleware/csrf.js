@@ -23,10 +23,16 @@ exports.csrf = void 0;
 const Boom = __importStar(require("@hapi/boom"));
 const async_middleware_1 = require("async-middleware");
 const csrf_1 = require("../lib/csrf");
-exports.csrf = async_middleware_1.wrap(async (req, _res, next) => {
-    if (csrf_1.CSRF.isTokenValid(req)) {
+const config_1 = require("../config");
+exports.csrf = async_middleware_1.wrap(async (req, res, next) => {
+    if (!config_1.config['csrf.enable']) {
         return next();
     }
+    if (csrf_1.CSRF.isTokenValid(req)) {
+        res.cookie('csrf_token', csrf_1.CSRF.generateToken(), { maxAge: config_1.config['csrf.token.ttl'] });
+        return next();
+    }
+    res.clearCookie('csrf_token');
     throw Boom.forbidden('invalid csrf');
 });
 //# sourceMappingURL=csrf.js.map

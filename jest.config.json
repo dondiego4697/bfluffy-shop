@@ -1,0 +1,23 @@
+{
+    "testTimeout": 10000,
+    "projects": [
+        {
+            "displayName": {
+                "name": "SRC",
+                "color": "cyan"
+            },
+            "testMatch": ["<rootDir>/out/server/**/*.test.js"]
+        }
+    ],
+    "reporters": [
+        "default",
+        [
+            "jest-html-reporter",
+            {
+                "pageTitle": "Tests Report",
+                "outputPath": "./out/tests-report/index.html",
+                "includeFailureMsg": true
+            }
+        ]
+    ]
+}

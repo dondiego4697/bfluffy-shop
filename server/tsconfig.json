@@ -17,6 +17,7 @@
         "sourceMap": true,
         "preserveWatchOutput": true,
 
+        "skipLibCheck": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "strictPropertyInitialization": false,
@@ -24,6 +25,7 @@
         "pretty": true,
         "paths": {
             "app/*": ["./app/*"],
+            "tests/*": ["./tests/*"],
             "api-v1/*": ["./app/api/v1/*"],
             "$db/entity/*": ["./db-entity/*"],
             "$logger/*": ["service/logger/*"],
@@ -33,10 +35,11 @@
         "plugins": [{"transform": "@zerollup/ts-transform-paths"}]
     },
     "include": [
-        "./@types/**/*",
-        "./app/**/*",
-        "./db-entity/**/*",
+        "@types/**/*",
+        "app/**/*",
+        "tests/**/*",
+        "db-entity/**/*",
         "service/**/*"
     ],
-    "exclude": ["out", "node_modules"]
+    "exclude": ["out", "node_modules", "temp"]
 }

@@ -21,29 +21,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.router = void 0;
 const express = __importStar(require("express"));
-const csrf_1 = require("../../middleware/csrf");
 const order_1 = require("./routers/order");
 const search_1 = require("./routers/search");
 const sms_1 = require("./routers/sms");
-// 1. Полнотекстовый поиск + suggest
-// - категории товара
-// - бренд
-// - категории животных
-// - название корма
-// 2. создать заказ
-// 2.1 отправить смс с кодом на телефон
-// 3. карточка заказа
-// 4. Простой поиск по фильтрам
-// - категории корма
-// - бренд
-// - категории животных
-// - цена
-// 5. список похожих товаров рандомно
+const catalog_1 = require("./routers/catalog");
 exports.router = express
     .Router()
-    // TODO сделать middleware которая проверяет rps по ip, ratelimiter по простому если
-    .use('/search', search_1.router)
+    .use('/catalog', catalog_1.router)
     .use('/sms', sms_1.router)
-    .use(csrf_1.csrf)
-    .use('/order', order_1.router);
+    .use('/order', order_1.router)
+    .use('/search', search_1.router);
 //# sourceMappingURL=index.js.map

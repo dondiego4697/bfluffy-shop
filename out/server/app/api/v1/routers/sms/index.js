@@ -27,7 +27,9 @@ const express = __importStar(require("express"));
 const Joi = __importStar(require("@hapi/joi"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const validate_1 = require("../../../../middleware/validate");
-const sendSchema = Joi.object({
+const send_code_1 = require("./send-code");
+const verify_code_1 = require("./verify-code");
+const sendCodeSchema = Joi.object({
     phone: Joi.number().required()
 });
 const verifySchema = Joi.object({
@@ -40,8 +42,6 @@ exports.router = express
     windowMs: 60 * 60 * 1000,
     max: 10 // Максимум 10 запросов за 1h на IP
 }))
-    // TODO отправлять смс с кодом только раз в 30 секунд
-    .post('/send', validate_1.bodyValidate(sendSchema))
-    // TODO при успешной верификации создаем в куках токен на 1h CSRF.generateToken
-    .post('/verify', validate_1.bodyValidate(verifySchema));
+    .post('/send_code', validate_1.bodyValidate(sendCodeSchema), send_code_1.sendCode)
+    .post('/verify_code', validate_1.bodyValidate(verifySchema), verify_code_1.verifyCode);
 //# sourceMappingURL=index.js.map

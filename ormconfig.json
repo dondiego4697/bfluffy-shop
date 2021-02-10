@@ -1,24 +1,52 @@
-{
-   "type": "postgres",
-   "host": "localhost",
-   "port": 6432,
-   "username": "postgres",
-   "password": "password",
-   "database": "petstore",
-   "synchronize": true,
-   "logging": false,
-   "entities": [
-      "database/entity/**/*.ts"
-   ],
-   "migrations": [
-      "database/migration/**/*.ts"
-   ],
-   "subscribers": [
-      "database/subscriber/**/*.ts"
-   ],
-   "cli": {
-      "entitiesDir": "database/entity",
-      "migrationsDir": "database/migration",
-      "subscribersDir": "database/subscriber"
+[
+   {
+      "name": "development",
+      "type": "postgres",
+      "host": "localhost",
+      "port": 6432,
+      "username": "postgres",
+      "password": "password",
+      "database": "petstore",
+      "synchronize": true,
+      "logging": false,
+      "entities": [
+         "database/entity/**/*.ts"
+      ],
+      "migrations": [
+         "database/migration/**/*.ts"
+      ],
+      "subscribers": [
+         "database/subscriber/**/*.ts"
+      ],
+      "cli": {
+         "entitiesDir": "database/entity",
+         "migrationsDir": "database/migration",
+         "subscribersDir": "database/subscriber"
+      }
+   },
+   {
+      "name": "tests",
+      "type": "postgres",
+      "host": "localhost",
+      "port": 6432,
+      "username": "postgres",
+      "password": "password",
+      "database": "petstore_test",
+      "synchronize": true,
+      "logging": false,
+      "entities": [
+         "database/entity/**/*.ts"
+      ],
+      "migrations": [
+         "database/migration/**/*.ts"
+      ],
+      "subscribers": [
+         "database/subscriber/**/*.ts"
+      ],
+      "cli": {
+         "entitiesDir": "database/entity",
+         "migrationsDir": "database/migration",
+         "subscribersDir": "database/subscriber"
+      }
    }
-}
+]

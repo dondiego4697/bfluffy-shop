@@ -1,4 +1,5 @@
 import {URL} from 'url';
+import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import {keyBy, omit} from 'lodash';
 import {Request, Response} from 'express';
@@ -69,6 +70,22 @@ export const createOrder = wrap<Request, Response>(async (req, res) => {
         }
 
         const catalogItemsHash = keyBy(catalogItems, 'catalogPublicId');
+
+        await pMap(
+            goods,
+            async (good) => {
+                const item = catalogItemsHash[good.publicId];
+                const {storage} = item;
+
+                return manager
+                    .createQueryBuilder()
+                    .update(Storage)
+                    .set({quantity: storage.quantity - good.quantity})
+                    .where('id = :id', {id: storage.id})
+                    .execute();
+            },
+            {concurrency: 1}
+        );
 
         await manager
             .createQueryBuilder()

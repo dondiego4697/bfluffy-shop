@@ -21,10 +21,5 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.router = void 0;
 const express = __importStar(require("express"));
-const Joi = __importStar(require("@hapi/joi"));
-const validate_1 = require("../../../../middleware/validate");
-const schema = Joi.object({
-    category_code: Joi.string().required()
-});
-exports.router = express.Router().post('/', validate_1.bodyValidate(schema)).get('/suggest');
+exports.router = express.Router();
 //# sourceMappingURL=index.js.map

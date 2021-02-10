@@ -7,14 +7,26 @@ exports.config = void 0;
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 const assert_1 = __importDefault(require("assert"));
 const production = {
+    'tests.enable': false,
     'logger.colorize': false,
     'logger.level': 'info',
     'cors.allowedOrigins': [],
-    'header.requestId': 'x-request-id'
+    'header.requestId': 'x-request-id',
+    'csrf.enable': true,
+    'csrf.token.ttl': 60 * 60 * 1000,
+    'app.cache.enable': true,
+    'app.host': 'https://some_host.ru',
+    db: {
+        hosts: ['localhost'],
+        port: 6432,
+        username: 'postgres',
+        password: 'password',
+        database: 'petstore'
+    }
 };
-const testing = Object.assign({}, production);
-const development = Object.assign(Object.assign({}, testing), { 'logger.colorize': true, 'logger.level': 'silly', 'cors.allowedOrigins': null });
-const tests = Object.assign({}, development);
+const testing = Object.assign(Object.assign({}, production), { db: Object.assign({}, production.db) });
+const development = Object.assign(Object.assign({}, testing), { 'logger.colorize': true, 'logger.level': 'silly', 'cors.allowedOrigins': null, 'csrf.enable': false, 'app.cache.enable': false, db: Object.assign(Object.assign({}, testing.db), { hosts: ['localhost'], port: 6432, username: 'postgres', password: 'password', database: 'petstore' }) });
+const tests = Object.assign(Object.assign({}, development), { 'tests.enable': true, 'csrf.enable': true, 'app.cache.enable': false, db: Object.assign(Object.assign({}, development.db), { database: 'petstore_test' }) });
 const configs = new Map([
     ['production', production],
     ['testing', testing],
