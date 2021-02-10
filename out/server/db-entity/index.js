@@ -19,13 +19,13 @@ const user_1 = require("./user");
 Object.defineProperty(exports, "User", { enumerable: true, get: function () { return user_1.User; } });
 var DbTable;
 (function (DbTable) {
-    DbTable["USER"] = "user";
+    DbTable["USER"] = "users";
     DbTable["BRAND"] = "brand";
     DbTable["CATALOG"] = "catalog";
     DbTable["GOOD_CATEGORY"] = "good_category";
     DbTable["PET_CATEGORY"] = "pet_category";
     DbTable["STORAGE"] = "storage";
-    DbTable["ORDER"] = "order";
+    DbTable["ORDER"] = "orders";
     DbTable["ORDER_POSITION"] = "order_position";
 })(DbTable = exports.DbTable || (exports.DbTable = {}));
 //# sourceMappingURL=index.js.map

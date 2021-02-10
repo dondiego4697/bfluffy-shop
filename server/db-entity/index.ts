@@ -10,12 +10,12 @@ import {User} from '$db/entity/user';
 export {Brand, Catalog, GoodCategory, OrderPosition, Order, PetCategory, Storage, User};
 
 export enum DbTable {
-    USER = 'user',
+    USER = 'users',
     BRAND = 'brand',
     CATALOG = 'catalog',
     GOOD_CATEGORY = 'good_category',
     PET_CATEGORY = 'pet_category',
     STORAGE = 'storage',
-    ORDER = 'order',
+    ORDER = 'orders',
     ORDER_POSITION = 'order_position'
 }

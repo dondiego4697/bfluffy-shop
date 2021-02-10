@@ -12,6 +12,7 @@ interface DB {
 export interface Config {
     'logger.colorize': boolean;
     'logger.level': string;
+    'logger.db.level': boolean | 'all' | 'error'[];
     'csrf.enable': boolean;
     'csrf.token.ttl': number;
     'cors.allowedOrigins': string[] | null;
@@ -25,6 +26,7 @@ export interface Config {
 const production: Config = {
     'tests.enable': false,
     'logger.colorize': false,
+    'logger.db.level': 'all',
     'logger.level': 'info',
     'cors.allowedOrigins': [],
     'header.requestId': 'x-request-id',
@@ -67,6 +69,7 @@ const development: Config = {
 
 const tests: Config = {
     ...development,
+    'logger.db.level': ['error'],
     'tests.enable': true,
     'csrf.enable': true,
     'app.cache.enable': false,

@@ -2,88 +2,80 @@ import faker from 'faker';
 import slugify from 'slugify';
 
 import {dbManager} from 'app/lib/db-manager';
-import {Brand, GoodCategory, PetCategory} from 'db-entity/index';
+import {Brand, Catalog, GoodCategory, PetCategory} from 'db-entity/index';
 
 async function createBrand() {
-    const name = faker.name.title();
+    const name = faker.name.title() + Math.random();
+    const {manager} = dbManager.getConnection().getRepository(Brand);
 
-    const {
-        raw: [brandRaw]
-    } = await dbManager
-        .getConnection()
-        .createQueryBuilder()
-        .insert()
-        .into(Brand)
-        .values([
-            {
-                code: slugify(name),
-                displayName: name
-            }
-        ])
-        .returning('*')
-        .execute();
+    const brand = manager.create(Brand, {
+        code: slugify(name),
+        displayName: name
+    });
 
-    return {
-        id: brandRaw.id,
-        code: brandRaw.code,
-        displayName: brandRaw.display_name
-    };
+    await manager.save(brand);
+
+    return manager.findOneOrFail(Brand, brand.id);
 }
 
 async function createPetCategory() {
-    const name = faker.name.title();
+    const name = faker.name.title() + Math.random();
+    const {manager} = dbManager.getConnection().getRepository(PetCategory);
 
-    const {
-        raw: [petRaw]
-    } = await dbManager
-        .getConnection()
-        .createQueryBuilder()
-        .insert()
-        .into(PetCategory)
-        .values([
-            {
-                code: slugify(name),
-                displayName: name
-            }
-        ])
-        .returning('*')
-        .execute();
+    const pet = manager.create(PetCategory, {
+        code: slugify(name),
+        displayName: name
+    });
 
-    return {
-        id: petRaw.id,
-        code: petRaw.code,
-        displayName: petRaw.display_name
-    };
+    await manager.save(pet);
+
+    return manager.findOneOrFail(PetCategory, pet.id);
 }
 
 async function createGoodCategory() {
-    const name = faker.name.title();
+    const name = faker.name.title() + Math.random();
+    const {manager} = dbManager.getConnection().getRepository(GoodCategory);
 
-    const {
-        raw: [goodRaw]
-    } = await dbManager
-        .getConnection()
-        .createQueryBuilder()
-        .insert()
-        .into(GoodCategory)
-        .values([
-            {
-                code: slugify(name),
-                displayName: name
-            }
-        ])
-        .returning('*')
-        .execute();
+    const good = manager.create(GoodCategory, {
+        code: slugify(name),
+        displayName: name
+    });
 
-    return {
-        id: goodRaw.id,
-        code: goodRaw.code,
-        displayName: goodRaw.display_name
-    };
+    await manager.save(good);
+
+    return manager.findOneOrFail(GoodCategory, good.id);
+}
+
+interface CreateCatalogParams {
+    groupId?: string;
+    goodCategoryId: number;
+    petCategoryId: number;
+    brandId: number;
+}
+
+async function createCatalog(params: CreateCatalogParams) {
+    const {manager} = dbManager.getConnection().getRepository(Catalog);
+
+    const catalog = manager.create(Catalog, {
+        groupId: params.groupId || faker.random.uuid(),
+        goodCategoryId: params.goodCategoryId,
+        petCategoryId: params.petCategoryId,
+        brandId: params.brandId,
+        displayName: faker.commerce.productName(),
+        description: faker.commerce.productDescription(),
+        manufacturerCountry: faker.address.country(),
+        photoUrls: [faker.image.image()],
+        weight: faker.random.float()
+    });
+
+    await manager.save(catalog);
+
+    return manager.findOneOrFail(Catalog, catalog.id);
 }
 
 export const TestFactory = {
     createBrand,
     createPetCategory,
-    createGoodCategory
+    createGoodCategory,
+    createCatalog
 };

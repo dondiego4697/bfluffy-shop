@@ -10,6 +10,7 @@ export class Catalog {
         this.goodCategoryId = toFinite(this.goodCategoryId);
         this.petCategoryId = toFinite(this.petCategoryId);
         this.brandId = toFinite(this.brandId);
+        this.weight = toFinite(this.weight);
     }
 
     @PrimaryGeneratedColumn()
@@ -43,19 +44,22 @@ export class Catalog {
     brand: Brand;
 
     @Column({nullable: true, name: 'display_name'})
-    displayName: string;
+    displayName?: string;
 
     @Column({nullable: true})
-    description: string;
+    description?: string;
 
     @Column()
     rating: number;
 
-    @Column({name: 'manufacturer_country'})
-    manufacturerCountry: string;
+    @Column({nullable: true, name: 'manufacturer_country'})
+    manufacturerCountry?: string;
 
-    @Column({nullable: true, type: 'simple-array', name: 'photo_urls'})
-    photoUrls: string[];
+    @Column({nullable: true, type: 'jsonb', name: 'photo_urls'})
+    photoUrls?: string[];
+
+    @Column({nullable: true})
+    weight?: number;
 
     @Column({name: 'created_at'})
     createdAt: Date;

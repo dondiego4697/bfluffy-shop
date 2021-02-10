@@ -3,6 +3,9 @@ import path from 'path';
 import nock from 'nock';
 import getPort from 'get-port';
 
+import {dbManager} from 'app/lib/db-manager';
+import {DbTable} from 'db-entity/index';
+
 export class TestContext {
     protected server?: execa.ExecaChildProcess;
     protected url?: string;
@@ -18,6 +21,8 @@ export class TestContext {
     public async beforeAll() {
         nock.disableNetConnect();
         nock.enableNetConnect(/localhost/);
+
+        await this.clearDb();
     }
 
     public async afterAll() {
@@ -31,6 +36,21 @@ export class TestContext {
 
     public async afterEach() {
         nock.cleanAll();
+    }
+
+    protected async clearDb() {
+        const tables = [
+            DbTable.ORDER_POSITION,
+            DbTable.ORDER,
+            DbTable.USER,
+            DbTable.STORAGE,
+            DbTable.CATALOG,
+            DbTable.BRAND,
+            DbTable.PET_CATEGORY,
+            DbTable.GOOD_CATEGORY
+        ];
+
+        await dbManager.getConnection().query(tables.map((table) => `TRUNCATE TABLE ${table} CASCADE;`).join('\n'));
     }
 
     protected async startServer() {

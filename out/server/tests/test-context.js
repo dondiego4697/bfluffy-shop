@@ -8,6 +8,8 @@ const execa_1 = __importDefault(require("execa"));
 const path_1 = __importDefault(require("path"));
 const nock_1 = __importDefault(require("nock"));
 const get_port_1 = __importDefault(require("get-port"));
+const db_manager_1 = require("../app/lib/db-manager");
+const index_1 = require("../db-entity/index");
 class TestContext {
     async getServerAddress() {
         if (this.url) {
@@ -18,14 +20,32 @@ class TestContext {
     async beforeAll() {
         nock_1.default.disableNetConnect();
         nock_1.default.enableNetConnect(/localhost/);
+        await this.clearDb();
     }
     async afterAll() {
         this.stopServer();
         nock_1.default.enableNetConnect();
     }
-    async beforeEach() { }
+    async beforeEach() {
+        nock_1.default.cleanAll();
+    }
     async afterEach() {
         nock_1.default.cleanAll();
+    }
+    async clearDb() {
+        const tables = [
+            index_1.DbTable.ORDER_POSITION,
+            index_1.DbTable.ORDER,
+            index_1.DbTable.USER,
+            index_1.DbTable.STORAGE,
+            index_1.DbTable.CATALOG,
+            index_1.DbTable.BRAND,
+            index_1.DbTable.PET_CATEGORY,
+            index_1.DbTable.GOOD_CATEGORY
+        ];
+        await db_manager_1.dbManager
+            .getConnection()
+            .query(tables.map((table) => `TRUNCATE TABLE ${table} CASCADE;`).join('\n'));
     }
     async startServer() {
         const port = String(await get_port_1.default());
@@ -39,6 +59,7 @@ class TestContext {
         this.server = server;
         this.url = `http://localhost:${port}`;
         await new Promise((resolve) => setTimeout(resolve, 1500));
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return this.url;
     }
     stopServer() {

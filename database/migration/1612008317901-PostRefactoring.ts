@@ -55,7 +55,7 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
                 description TEXT,
                 rating REAL NOT NULL DEFAULT 0,
                 manufacturer_country TEXT,
-                photo_urls TEXT[],
+                photo_urls JSONB NOT NULL DEFAULT '[]'::jsonb,
 
                 weight NUMERIC(9, 2),
 

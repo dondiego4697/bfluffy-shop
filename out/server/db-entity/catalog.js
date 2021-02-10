@@ -19,6 +19,7 @@ let Catalog = class Catalog {
         this.goodCategoryId = lodash_1.toFinite(this.goodCategoryId);
         this.petCategoryId = lodash_1.toFinite(this.petCategoryId);
         this.brandId = lodash_1.toFinite(this.brandId);
+        this.weight = lodash_1.toFinite(this.weight);
     }
 };
 __decorate([
@@ -79,13 +80,17 @@ __decorate([
     __metadata("design:type", Number)
 ], Catalog.prototype, "rating", void 0);
 __decorate([
-    typeorm_1.Column({ name: 'manufacturer_country' }),
+    typeorm_1.Column({ nullable: true, name: 'manufacturer_country' }),
     __metadata("design:type", String)
 ], Catalog.prototype, "manufacturerCountry", void 0);
 __decorate([
-    typeorm_1.Column({ nullable: true, type: 'simple-array', name: 'photo_urls' }),
+    typeorm_1.Column({ nullable: true, type: 'jsonb', name: 'photo_urls' }),
     __metadata("design:type", Array)
 ], Catalog.prototype, "photoUrls", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", Number)
+], Catalog.prototype, "weight", void 0);
 __decorate([
     typeorm_1.Column({ name: 'created_at' }),
     __metadata("design:type", Date)

@@ -9,6 +9,7 @@ const assert_1 = __importDefault(require("assert"));
 const production = {
     'tests.enable': false,
     'logger.colorize': false,
+    'logger.db.level': 'all',
     'logger.level': 'info',
     'cors.allowedOrigins': [],
     'header.requestId': 'x-request-id',
@@ -26,7 +27,7 @@ const production = {
 };
 const testing = Object.assign(Object.assign({}, production), { db: Object.assign({}, production.db) });
 const development = Object.assign(Object.assign({}, testing), { 'logger.colorize': true, 'logger.level': 'silly', 'cors.allowedOrigins': null, 'csrf.enable': false, 'app.cache.enable': false, db: Object.assign(Object.assign({}, testing.db), { hosts: ['localhost'], port: 6432, username: 'postgres', password: 'password', database: 'petstore' }) });
-const tests = Object.assign(Object.assign({}, development), { 'tests.enable': true, 'csrf.enable': true, 'app.cache.enable': false, db: Object.assign(Object.assign({}, development.db), { database: 'petstore_test' }) });
+const tests = Object.assign(Object.assign({}, development), { 'logger.db.level': ['error'], 'tests.enable': true, 'csrf.enable': true, 'app.cache.enable': false, db: Object.assign(Object.assign({}, development.db), { database: 'petstore_test' }) });
 const configs = new Map([
     ['production', production],
     ['testing', testing],

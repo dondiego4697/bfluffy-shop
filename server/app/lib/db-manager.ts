@@ -32,10 +32,10 @@ class DbManager {
                 ]
             },
             entities: [Brand, Catalog, GoodCategory, OrderPosition, Order, PetCategory, Storage, User],
-            logging: 'all',
+            logging: config['logger.db.level'],
             maxQueryExecutionTime: 5000,
             extra: {
-                connectionLimit: 100
+                connectionLimit: 500
             }
         });
 

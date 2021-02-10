@@ -40,26 +40,30 @@ export const getCatalogItem = wrap<Request, Response>(async (req, res) => {
         throw Boom.notFound();
     }
 
-    const data = catalogItems.map((item) => ({
-        publicId: item.publicId,
-        displayName: item.displayName,
-        description: item.description,
-        rating: item.rating,
-        manufacturerCountry: item.manufacturerCountry,
-        photoUrls: item.photoUrls || [],
+    const [firstItem] = catalogItems;
+
+    const data = {
         brand: {
-            code: item.brand.code,
-            name: item.brand.displayName
+            code: firstItem.brand.code,
+            name: firstItem.brand.displayName
         },
         pet: {
-            code: item.petCategory.code,
-            name: item.petCategory.displayName
+            code: firstItem.petCategory.code,
+            name: firstItem.petCategory.displayName
         },
         good: {
-            code: item.goodCategory.code,
-            name: item.goodCategory.displayName
-        }
-    }));
+            code: firstItem.goodCategory.code,
+            name: firstItem.goodCategory.displayName
+        },
+        displayName: firstItem.displayName,
+        description: firstItem.description,
+        manufacturerCountry: firstItem.manufacturerCountry,
+        items: catalogItems.map((item) => ({
+            publicId: item.publicId,
+            rating: item.rating,
+            photoUrls: item.photoUrls || []
+        }))
+    };
 
     requestCache.set(req, data);
     res.json(data);

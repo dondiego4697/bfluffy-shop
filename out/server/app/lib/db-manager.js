@@ -32,10 +32,10 @@ class DbManager {
                 ]
             },
             entities: [index_1.Brand, index_1.Catalog, index_1.GoodCategory, index_1.OrderPosition, index_1.Order, index_1.PetCategory, index_1.Storage, index_1.User],
-            logging: 'all',
+            logging: config_1.config['logger.db.level'],
             maxQueryExecutionTime: 5000,
             extra: {
-                connectionLimit: 100
+                connectionLimit: 500
             }
         });
         this.isActive = true;
