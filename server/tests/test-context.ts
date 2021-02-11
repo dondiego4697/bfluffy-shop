@@ -4,7 +4,7 @@ import nock from 'nock';
 import getPort from 'get-port';
 
 import {dbManager} from 'app/lib/db-manager';
-import {DbTable} from 'db-entity/index';
+import {DbTable} from '$db-entity/tables';
 
 export class TestContext {
     protected server?: execa.ExecaChildProcess;
@@ -44,6 +44,7 @@ export class TestContext {
             DbTable.ORDER,
             DbTable.USER,
             DbTable.STORAGE,
+            DbTable.CATALOG_ITEM,
             DbTable.CATALOG,
             DbTable.BRAND,
             DbTable.PET_CATEGORY,

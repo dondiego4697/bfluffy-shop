@@ -3,8 +3,10 @@ import pMap from 'p-map';
 import {Request, Response} from 'express';
 import {wrap} from 'async-middleware';
 import {dbManager} from 'app/lib/db-manager';
-import {DbTable, Order, Storage} from '$db/entity/index';
-import {OrderStatus, OrderResolution} from '$db/entity/order';
+import {OrderStatus, OrderResolution} from 'db-entity/order';
+import {Order} from '$db-entity/entities';
+import {DbTable} from '$db-entity/tables';
+import {ClientError} from '$error/error';
 
 export const cancelOrder = wrap<Request, Response>(async (req, res) => {
     const {public_id: publicId} = req.params;
@@ -21,6 +23,10 @@ export const cancelOrder = wrap<Request, Response>(async (req, res) => {
         throw Boom.notFound();
     }
 
+    if (order.status === 'FINISHED') {
+        throw new ClientError('ORDER_ALREADY_FINISHED', {meta: {order}});
+    }
+
     await dbManager.getConnection().transaction(async (manager) => {
         await manager
             .createQueryBuilder()
@@ -29,17 +35,24 @@ export const cancelOrder = wrap<Request, Response>(async (req, res) => {
             .where('id = :id', {id: order.id})
             .execute();
 
+        console.log(order.orderPositions);
+
         await pMap(
             order.orderPositions,
             async (position) => {
-                const {storage} = position.data;
+                const {
+                    quantity,
+                    data: {storage}
+                } = position;
 
-                return manager
-                    .createQueryBuilder()
-                    .update(Storage)
-                    .set({quantity: storage.quantity + position.quantity})
-                    .where('id = :id', {id: storage.id})
-                    .execute();
+                return manager.query(
+                    `
+                        UPDATE ${DbTable.STORAGE}
+                        SET quantity = quantity + ${quantity}
+                        WHERE id = $1
+                    `,
+                    [storage.id]
+                );
             },
             {concurrency: 1}
         );

@@ -32,19 +32,19 @@ describe(PATH, () => {
             brands: [
                 {
                     code: brand.code,
-                    displayName: brand.displayName
+                    name: brand.displayName
                 }
             ],
-            goodCategories: [
+            goods: [
                 {
                     code: good.code,
-                    displayName: good.displayName
+                    name: good.displayName
                 }
             ],
-            petCategories: [
+            pets: [
                 {
                     code: pet.code,
-                    displayName: pet.displayName
+                    name: pet.displayName
                 }
             ]
         });

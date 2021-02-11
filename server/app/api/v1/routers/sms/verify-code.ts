@@ -2,9 +2,9 @@ import Boom from '@hapi/boom';
 import {Request, Response} from 'express';
 import {wrap} from 'async-middleware';
 import {dbManager} from 'app/lib/db-manager';
-import {DbTable, User} from '$db/entity/index';
 import {CSRF} from 'app/lib/csrf';
 import {config} from 'app/config';
+import {User} from '$db-entity/entities';
 
 interface Body {
     phone: number;
@@ -14,13 +14,8 @@ interface Body {
 export const verifyCode = wrap<Request, Response>(async (req, res) => {
     const {phone, code} = req.body as Body;
 
-    const connection = dbManager.getConnection();
-
-    const user = await connection
-        .getRepository(User)
-        .createQueryBuilder(DbTable.USER)
-        .where(`${DbTable.USER}.phone = :phone`, {phone})
-        .getOne();
+    const {manager} = dbManager.getConnection().getRepository(User);
+    const user = await manager.findOne(User, {phone: String(phone)});
 
     if (!user) {
         throw Boom.notFound();

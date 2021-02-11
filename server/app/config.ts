@@ -59,7 +59,7 @@ const development: Config = {
     'app.cache.enable': false,
     db: {
         ...testing.db,
-        hosts: ['localhost'],
+        hosts: ['localhost', 'localhost'],
         port: 6432,
         username: 'postgres',
         password: 'password',

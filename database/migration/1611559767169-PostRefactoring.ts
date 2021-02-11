@@ -11,16 +11,24 @@ export class PostRefactoring1611559767169 implements MigrationInterface {
                 last_sms_code INTEGER NOT NULL,
                 last_sms_code_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
 
+                is_root BOOLEAN NOT NULL DEFAULT FALSE,
+
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
 
                 CONSTRAINT pk_users PRIMARY KEY (id),
                 CONSTRAINT uq_users_phone UNIQUE (phone)
-            )
+            );
+
+            CREATE INDEX users_phone_idx ON users (phone);
         `);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`DROP TABLE "users";`);
+        await queryRunner.query(`
+            DROP INDEX users_phone_idx;
+
+            DROP TABLE "users";
+        `);
     }
 
 }

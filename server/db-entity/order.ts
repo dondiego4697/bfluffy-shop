@@ -1,6 +1,7 @@
 import {toFinite} from 'lodash';
 import {Entity, PrimaryGeneratedColumn, Column, OneToMany, AfterLoad} from 'typeorm';
-import {OrderPosition} from '$db/entity/index';
+import {OrderPosition} from '$db-entity/entities';
+import {DbTable} from '$db-entity/tables';
 
 interface Data {
     sdek: string;
@@ -14,11 +15,11 @@ export enum OrderStatus {
 
 export enum OrderResolution {
     SUCCESS = 'SUCCESS',
-    CANCELLED = 'CANCELLED',
-    ANNULATED = 'ANNULATED'
+    CANCELLED = 'CANCELLED', // Со стороны пользователя
+    ANNULATED = 'ANNULATED' // Со стороны нас
 }
 
-@Entity({name: 'orders'})
+@Entity({name: DbTable.ORDER})
 export class Order {
     @AfterLoad()
     _convertNumerics() {
@@ -44,17 +45,17 @@ export class Order {
     deliveryAddress: string;
 
     @Column({nullable: true, name: 'delivery_comment'})
-    deliveryComment: string;
+    deliveryComment?: string;
 
     @Column({name: 'delivery_date'})
     deliveryDate: Date;
-
-    @Column({name: 'created_at'})
-    createdAt: Date;
 
     @Column()
     status: OrderStatus;
 
     @Column({nullable: true})
-    resolution: OrderResolution;
+    resolution?: OrderResolution;
+
+    @Column({name: 'created_at'})
+    createdAt: Date;
 }

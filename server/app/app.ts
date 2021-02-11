@@ -16,6 +16,7 @@ import {cors} from 'app/middleware/cors';
 import {requestId} from 'app/middleware/request-id';
 import {logger as loggerMiddleware} from 'app/middleware/logger';
 import {router as v1} from 'app/api/v1';
+import {ClientError} from '$error/error';
 
 const bodyParserJson = bodyParser.json({
     limit: '5mb',
@@ -42,6 +43,8 @@ export const app = express()
     .use((error: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
         if (error.isBoom) {
             sendError(res, error);
+        } else if (error instanceof ClientError) {
+            sendError(res, Boom.badRequest(error.clientErrorCode));
         } else {
             req.logger.error(`unknown error: ${error.message}`);
             sendError(res, Boom.internal());

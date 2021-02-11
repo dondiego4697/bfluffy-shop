@@ -44,20 +44,15 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
 
             CREATE TABLE catalog (
                 id BIGSERIAL NOT NULL,
-                public_id UUID NOT NULL DEFAULT uuid_generate_v1(),
-                group_id UUID NOT NULL DEFAULT uuid_generate_v1(),
 
                 good_category_id INTEGER NOT NULL,
                 brand_id INTEGER NOT NULL,
                 pet_category_id INTEGER NOT NULL,
 
-                display_name TEXT,
+                display_name TEXT NOT NULL,
                 description TEXT,
                 rating REAL NOT NULL DEFAULT 0,
                 manufacturer_country TEXT,
-                photo_urls JSONB NOT NULL DEFAULT '[]'::jsonb,
-
-                weight NUMERIC(9, 2),
 
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
@@ -65,8 +60,7 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
                 CONSTRAINT pk_catalog PRIMARY KEY (id),
                 CONSTRAINT fk_catalog_good_category_id_good_category FOREIGN KEY(good_category_id) REFERENCES good_category (id),
                 CONSTRAINT fk_catalog_brand_id_brand FOREIGN KEY(brand_id) REFERENCES brand (id),
-                CONSTRAINT fk_catalog_pet_category_id_pet_category FOREIGN KEY(pet_category_id) REFERENCES pet_category (id),
-                CONSTRAINT uq_catalog_public_id UNIQUE (public_id)
+                CONSTRAINT fk_catalog_pet_category_id_pet_category FOREIGN KEY(pet_category_id) REFERENCES pet_category (id)
             );
 
             CREATE TRIGGER
@@ -76,10 +70,36 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
             FOR EACH ROW EXECUTE PROCEDURE
                 updated_at_column_f();
 
+            CREATE TABLE catalog_item (
+                id BIGSERIAL NOT NULL,
+                public_id UUID NOT NULL DEFAULT uuid_generate_v1(),
+
+                catalog_id BIGINT NOT NULL,
+
+                photo_urls JSONB NOT NULL DEFAULT '[]'::jsonb,
+                weight NUMERIC(9, 2),
+
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+
+                CONSTRAINT pk_catalog_item PRIMARY KEY (id),
+                CONSTRAINT uq_catalog_item_public_id UNIQUE (public_id),
+                CONSTRAINT fk_catalog_item_catalog_id_catalog FOREIGN KEY(catalog_id) REFERENCES catalog (id)
+            );
+
+            CREATE INDEX catalog_item_public_id_idx ON catalog_item (public_id);
+
+            CREATE TRIGGER
+                update_catalog_item_updated_at_trigger
+            BEFORE UPDATE ON
+                catalog_item
+            FOR EACH ROW EXECUTE PROCEDURE
+                updated_at_column_f();
+
             CREATE TABLE storage (
                 id BIGSERIAL NOT NULL,
 
-                catalog_id BIGINT NOT NULL,
+                catalog_item_id BIGINT NOT NULL,
 
                 cost NUMERIC(9, 2) NOT NULL,
                 quantity INTEGER NOT NULL,
@@ -88,8 +108,8 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
 
                 CONSTRAINT pk_storage PRIMARY KEY (id),
-                CONSTRAINT fk_storage_catalog_id_catalog FOREIGN KEY(catalog_id) REFERENCES catalog (id),
-                CONSTRAINT uq_storage_catalog_id UNIQUE (catalog_id)
+                CONSTRAINT fk_storage_catalog_item_id_catalog_item FOREIGN KEY(catalog_item_id) REFERENCES catalog_item (id),
+                CONSTRAINT uq_storage_catalog_item_id UNIQUE (catalog_item_id)
             );
 
             CREATE TRIGGER
@@ -105,8 +125,12 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
         await queryRunner.query(`
             DROP TRIGGER update_storage_updated_at_trigger ON storage;
             DROP TRIGGER update_catalog_updated_at_trigger ON catalog;
+            DROP TRIGGER update_catalog_item_updated_at_trigger ON catalog_item;
+
+            DROP INDEX catalog_item_public_id_idx;
 
             DROP TABLE storage;
+            DROP TABLE catalog_item;
             DROP TABLE catalog;
 
             DROP TABLE pet_category;

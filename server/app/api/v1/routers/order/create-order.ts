@@ -1,14 +1,16 @@
 import {URL} from 'url';
+import moment from 'moment';
 import pMap from 'p-map';
-import Boom from '@hapi/boom';
 import {keyBy, omit} from 'lodash';
 import {Request, Response} from 'express';
 import {wrap} from 'async-middleware';
 import {config} from 'app/config';
 import {dbManager} from 'app/lib/db-manager';
-import {OrderStatus} from '$db/entity/order';
+import {OrderStatus} from 'db-entity/order';
 import {smsProvider} from '$sms/sms';
-import {Order, Storage, OrderPosition, DbTable} from '$db/entity/index';
+import {Order, OrderPosition, Storage} from '$db-entity/entities';
+import {DbTable} from '$db-entity/tables';
+import {ClientError} from '$error/error';
 
 interface Body {
     phone: number;
@@ -28,53 +30,101 @@ export const createOrder = wrap<Request, Response>(async (req, res) => {
     const {phone, delivery, goods} = req.body as Body;
 
     const orderPublicId = await dbManager.getConnection().transaction(async (manager) => {
-        const order = await manager
-            .createQueryBuilder()
-            .insert()
-            .into(Order)
-            .values([
-                {
-                    data: {}, // TODO sdek
-                    clientPhone: String(phone),
-                    deliveryAddress: delivery.address,
-                    deliveryComment: delivery.comment,
-                    deliveryDate: delivery.date,
-                    status: OrderStatus.CREATED
-                }
-            ])
-            .returning('*')
-            .execute();
+        const {manager: orderManager} = manager.getRepository(Order);
 
-        const orderId = order.identifiers[0].id;
-        const goodPublicIds = goods.map(({publicId}) => publicId);
+        const orderRaw = orderManager.create(Order, {
+            data: {}, // TODO sdek
+            clientPhone: String(phone),
+            deliveryAddress: delivery.address,
+            deliveryComment: delivery.comment,
+            deliveryDate: delivery.date,
+            status: OrderStatus.CREATED
+        });
 
-        const catalogItemsRaw = await manager
+        await orderManager.save(orderRaw);
+        const order = await orderManager.findOneOrFail(Order, orderRaw.id);
+
+        const goodsPublicIds = goods.map(({publicId}) => publicId);
+
+        const storageItems = await manager
             .getRepository(Storage)
             .createQueryBuilder(DbTable.STORAGE)
-            .leftJoinAndSelect(`${DbTable.STORAGE}.catalog`, DbTable.CATALOG)
+            .leftJoinAndSelect(`${DbTable.STORAGE}.catalogItem`, DbTable.CATALOG_ITEM)
+            .leftJoinAndSelect(`${DbTable.CATALOG_ITEM}.catalog`, DbTable.CATALOG)
             .innerJoinAndSelect(`${DbTable.CATALOG}.brand`, DbTable.BRAND)
             .innerJoinAndSelect(`${DbTable.CATALOG}.petCategory`, DbTable.PET_CATEGORY)
             .innerJoinAndSelect(`${DbTable.CATALOG}.goodCategory`, DbTable.GOOD_CATEGORY)
-            .where(`${DbTable.CATALOG}.publicId IN (:...ids)`, {ids: goodPublicIds})
+            .where(`${DbTable.CATALOG_ITEM}.publicId IN (:...ids)`, {ids: goodsPublicIds})
             .getMany();
 
-        const catalogItems = catalogItemsRaw.map((item) => ({
-            storage: omit(item, 'catalog'),
-            catalog: item.catalog,
-            catalogPublicId: item.catalog.publicId
-        }));
+        const storageItemsHash = keyBy(
+            storageItems.map((storageItem) => {
+                const {catalogItem} = storageItem;
+                const {catalog} = catalogItem;
 
-        if (catalogItems.length !== goods.length) {
-            req.logger.error('unknown good ids exist', {goods, catalogItems});
-            throw Boom.badRequest();
+                return {
+                    storage: {
+                        id: storageItem.id,
+                        cost: storageItem.cost,
+                        quantity: storageItem.quantity,
+                        createdAt: moment(storageItem.createdAt).toISOString(),
+                        updatedAt: moment(storageItem.updatedAt).toISOString()
+                    },
+                    catalog: {
+                        id: catalog.id,
+                        displayName: catalog.displayName,
+                        description: catalog.description,
+                        rating: catalog.rating,
+                        manufacturerCountry: catalog.manufacturerCountry,
+                        brand: {
+                            code: catalog.brand.code,
+                            name: catalog.brand.displayName
+                        },
+                        pet: {
+                            code: catalog.petCategory.code,
+                            name: catalog.petCategory.displayName
+                        },
+                        good: {
+                            code: catalog.goodCategory.code,
+                            name: catalog.goodCategory.displayName
+                        },
+                        createdAt: moment(catalog.createdAt).toISOString(),
+                        updatedAt: moment(catalog.updatedAt).toISOString()
+                    },
+                    catalogItem: {
+                        id: catalogItem.id,
+                        publicId: catalogItem.publicId,
+                        photoUrls: catalogItem.photoUrls,
+                        weight: catalogItem.weight,
+                        createdAt: moment(catalogItem.createdAt).toISOString(),
+                        updatedAt: moment(catalogItem.updatedAt).toISOString()
+                    },
+                    catalogItemPublicId: storageItem.catalogItem.publicId
+                };
+            }),
+            'catalogItemPublicId'
+        );
+
+        // Проверяем что все позиции найдены
+        if (Object.keys(storageItemsHash).length !== goods.length) {
+            throw new ClientError('COST_OR_QUANTITY_CHANGED', {meta: {goods, storageItems}});
         }
 
-        const catalogItemsHash = keyBy(catalogItems, 'catalogPublicId');
+        // Проверяем, что цена и кол-во подходит
+        const isValid = goods.every((good) => {
+            const item = storageItemsHash[good.publicId];
+
+            return good.cost === item.storage.cost && good.quantity <= item.storage.quantity;
+        });
+
+        if (!isValid) {
+            throw new ClientError('COST_OR_QUANTITY_CHANGED', {meta: {goods, storageItems}});
+        }
 
         await pMap(
             goods,
             async (good) => {
-                const item = catalogItemsHash[good.publicId];
+                const item = storageItemsHash[good.publicId];
                 const {storage} = item;
 
                 return manager
@@ -84,7 +134,7 @@ export const createOrder = wrap<Request, Response>(async (req, res) => {
                     .where('id = :id', {id: storage.id})
                     .execute();
             },
-            {concurrency: 1}
+            {concurrency: 2}
         );
 
         await manager
@@ -93,47 +143,19 @@ export const createOrder = wrap<Request, Response>(async (req, res) => {
             .into(OrderPosition)
             .values(
                 goods.map((good) => {
-                    const item = catalogItemsHash[good.publicId];
-                    const {storage, catalog} = item;
+                    const item = storageItemsHash[good.publicId];
 
                     return {
-                        orderId,
+                        orderId: order.id,
                         cost: good.cost,
                         quantity: good.quantity,
-                        data: {
-                            storage: {
-                                id: storage.id,
-                                cost: storage.cost,
-                                quantity: storage.quantity
-                            },
-                            catalog: {
-                                id: catalog.id,
-                                publicId: catalog.publicId,
-                                displayName: catalog.displayName,
-                                description: catalog.description,
-                                rating: catalog.rating,
-                                manufacturerCountry: catalog.manufacturerCountry,
-                                photoUrls: catalog.photoUrls || [],
-                                brand: {
-                                    code: catalog.brand.code,
-                                    name: catalog.brand.displayName
-                                },
-                                pet: {
-                                    code: catalog.petCategory.code,
-                                    name: catalog.petCategory.displayName
-                                },
-                                good: {
-                                    code: catalog.goodCategory.code,
-                                    name: catalog.goodCategory.displayName
-                                }
-                            }
-                        }
+                        data: omit(item, 'catalogItemPublicId')
                     };
                 })
             )
             .execute();
 
-        return order.raw[0].public_id;
+        return order.publicId;
     });
 
     const url = new URL(`/order/${orderPublicId}`, config['app.host']);

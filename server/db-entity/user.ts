@@ -1,6 +1,7 @@
 import {Entity, PrimaryGeneratedColumn, Column} from 'typeorm';
+import {DbTable} from '$db-entity/tables';
 
-@Entity({name: 'users'})
+@Entity({name: DbTable.USER})
 export class User {
     @PrimaryGeneratedColumn()
     id: number;
@@ -13,6 +14,9 @@ export class User {
 
     @Column({name: 'last_sms_code_at'})
     lastSmsCodeAt: Date;
+
+    @Column({name: 'is_root'})
+    isRoot: boolean;
 
     @Column({name: 'created_at'})
     createdAt: Date;

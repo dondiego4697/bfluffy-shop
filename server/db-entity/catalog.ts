@@ -1,8 +1,9 @@
 import {toFinite} from 'lodash';
-import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, AfterLoad, JoinColumn} from 'typeorm';
-import {GoodCategory, PetCategory, Brand} from '$db/entity/index';
+import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, AfterLoad, JoinColumn, OneToMany} from 'typeorm';
+import {GoodCategory, PetCategory, Brand, CatalogItem} from '$db-entity/entities';
+import {DbTable} from '$db-entity/tables';
 
-@Entity()
+@Entity({name: DbTable.CATALOG})
 export class Catalog {
     @AfterLoad()
     _convertNumerics() {
@@ -10,17 +11,10 @@ export class Catalog {
         this.goodCategoryId = toFinite(this.goodCategoryId);
         this.petCategoryId = toFinite(this.petCategoryId);
         this.brandId = toFinite(this.brandId);
-        this.weight = toFinite(this.weight);
     }
 
     @PrimaryGeneratedColumn()
     id: number;
-
-    @Column({name: 'public_id'})
-    publicId: string;
-
-    @Column({name: 'group_id'})
-    groupId: string;
 
     @Column({name: 'good_category_id'})
     goodCategoryId: number;
@@ -43,8 +37,11 @@ export class Catalog {
     @JoinColumn({name: 'brand_id', referencedColumnName: 'id'})
     brand: Brand;
 
-    @Column({nullable: true, name: 'display_name'})
-    displayName?: string;
+    @OneToMany(() => CatalogItem, (catalogItem) => catalogItem.catalog)
+    catalogItems: CatalogItem[];
+
+    @Column({name: 'display_name'})
+    displayName: string;
 
     @Column({nullable: true})
     description?: string;
@@ -54,12 +51,6 @@ export class Catalog {
 
     @Column({nullable: true, name: 'manufacturer_country'})
     manufacturerCountry?: string;
-
-    @Column({nullable: true, type: 'jsonb', name: 'photo_urls'})
-    photoUrls?: string[];
-
-    @Column({nullable: true})
-    weight?: number;
 
     @Column({name: 'created_at'})
     createdAt: Date;

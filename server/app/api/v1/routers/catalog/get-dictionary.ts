@@ -1,8 +1,9 @@
 import {Request, Response} from 'express';
 import {wrap} from 'async-middleware';
 import {dbManager} from 'app/lib/db-manager';
-import {DbTable, Brand, GoodCategory, PetCategory} from '$db/entity/index';
 import {requestCache} from 'app/lib/request-cache';
+import {Brand, GoodCategory, PetCategory} from '$db-entity/entities';
+import {DbTable} from '$db-entity/tables';
 
 export const getDictionary = wrap<Request, Response>(async (req, res) => {
     const cache = requestCache.get(req);
@@ -24,9 +25,9 @@ export const getDictionary = wrap<Request, Response>(async (req, res) => {
     ]);
 
     const data = {
-        brands: brands.map(({code, displayName}) => ({code, displayName})),
-        goodCategories: goodCategories.map(({code, displayName}) => ({code, displayName})),
-        petCategories: petCategories.map(({code, displayName}) => ({code, displayName}))
+        brands: brands.map(({code, displayName}) => ({code, name: displayName})),
+        goods: goodCategories.map(({code, displayName}) => ({code, name: displayName})),
+        pets: petCategories.map(({code, displayName}) => ({code, name: displayName}))
     };
 
     requestCache.set(req, data);

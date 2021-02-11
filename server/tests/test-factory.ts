@@ -2,7 +2,7 @@ import faker from 'faker';
 import slugify from 'slugify';
 
 import {dbManager} from 'app/lib/db-manager';
-import {Brand, Catalog, GoodCategory, PetCategory} from 'db-entity/index';
+import {Brand, Catalog, GoodCategory, PetCategory} from '$db-entity/entities';
 
 async function createBrand() {
     const name = faker.name.title() + Math.random();
@@ -47,7 +47,6 @@ async function createGoodCategory() {
 }
 
 interface CreateCatalogParams {
-    groupId?: string;
     goodCategoryId: number;
     petCategoryId: number;
     brandId: number;
@@ -57,15 +56,13 @@ async function createCatalog(params: CreateCatalogParams) {
     const {manager} = dbManager.getConnection().getRepository(Catalog);
 
     const catalog = manager.create(Catalog, {
-        groupId: params.groupId || faker.random.uuid(),
         goodCategoryId: params.goodCategoryId,
         petCategoryId: params.petCategoryId,
         brandId: params.brandId,
         displayName: faker.commerce.productName(),
         description: faker.commerce.productDescription(),
-        manufacturerCountry: faker.address.country(),
-        photoUrls: [faker.image.image()],
-        weight: faker.random.float()
+        rating: faker.random.float() % 5,
+        manufacturerCountry: faker.address.country()
     });
 
     await manager.save(catalog);

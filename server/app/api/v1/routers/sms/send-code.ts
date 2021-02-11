@@ -3,8 +3,8 @@ import {random} from 'lodash';
 import {Request, Response} from 'express';
 import {wrap} from 'async-middleware';
 import {dbManager} from 'app/lib/db-manager';
-import {DbTable, User} from '$db/entity/index';
 import {smsProvider} from '$sms/sms';
+import {User} from '$db-entity/entities';
 
 interface Body {
     phone: number;
@@ -17,12 +17,8 @@ export const sendCode = wrap<Request, Response>(async (req, res) => {
     const code = random(1000, 9999);
 
     const connection = dbManager.getConnection();
-
-    const user = await connection
-        .getRepository(User)
-        .createQueryBuilder(DbTable.USER)
-        .where(`${DbTable.USER}.phone = :phone`, {phone})
-        .getOne();
+    const {manager} = connection.getRepository(User);
+    const user = await manager.findOne(User, {phone: String(phone)});
 
     if (!user) {
         await connection
@@ -36,7 +32,6 @@ export const sendCode = wrap<Request, Response>(async (req, res) => {
                     lastSmsCodeAt: () => 'now()'
                 }
             ])
-            .returning('*')
             .execute();
 
         smsProvider.sendSms(phone, `Ваш код: ${code}`);

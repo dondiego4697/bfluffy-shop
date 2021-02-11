@@ -2,7 +2,8 @@ import Boom from '@hapi/boom';
 import {Request, Response} from 'express';
 import {wrap} from 'async-middleware';
 import {dbManager} from 'app/lib/db-manager';
-import {DbTable, Order} from '$db/entity/index';
+import {Order} from '$db-entity/entities';
+import {DbTable} from '$db-entity/tables';
 
 export const getOrder = wrap<Request, Response>(async (req, res) => {
     const {public_id: publicId} = req.params;
@@ -35,18 +36,24 @@ export const getOrder = wrap<Request, Response>(async (req, res) => {
                 date: order.deliveryDate
             }
         },
-        positions: order.orderPositions.map((position) => ({
-            cost: position.cost,
-            quantity: position.quantity,
-            good: position.data.catalog.good,
-            pet: position.data.catalog.pet,
-            brand: position.data.catalog.brand,
-            manufacturerCountry: position.data.catalog.manufacturerCountry,
-            photoUrls: position.data.catalog.photoUrls,
-            rating: position.data.catalog.rating,
-            displayName: position.data.catalog.displayName,
-            description: position.data.catalog.description
-        }))
+        positions: order.orderPositions.map((position) => {
+            const {data} = position;
+            const {catalog, catalogItem} = data;
+
+            return {
+                cost: position.cost,
+                quantity: position.quantity,
+                good: catalog.good,
+                pet: catalog.pet,
+                brand: catalog.brand,
+                manufacturerCountry: catalog.manufacturerCountry,
+                rating: catalog.rating,
+                displayName: catalog.displayName,
+                description: catalog.description,
+                photoUrls: catalogItem.photoUrls,
+                weight: catalogItem.weight
+            };
+        })
     };
 
     res.json(result);

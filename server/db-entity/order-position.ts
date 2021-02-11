@@ -1,21 +1,22 @@
 import {toFinite} from 'lodash';
 import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, AfterLoad} from 'typeorm';
-import {Order} from '$db/entity/index';
+import {Order} from '$db-entity/entities';
+import {DbTable} from '$db-entity/tables';
 
 export interface OrderPositionData {
     storage: {
         id: number;
         cost: number;
         quantity: number;
+        createdAt: string;
+        updatedAt: string;
     };
     catalog: {
         id: number;
-        publicId: string;
-        displayName?: string;
+        displayName: string;
         description?: string;
-        rating?: number;
+        rating: number;
         manufacturerCountry?: string;
-        photoUrls: string[];
         brand: {
             code: string;
             name: string;
@@ -28,10 +29,20 @@ export interface OrderPositionData {
             code: string;
             name: string;
         };
+        createdAt: string;
+        updatedAt: string;
+    };
+    catalogItem: {
+        id: number;
+        publicId: string;
+        photoUrls: string[];
+        weight?: number;
+        createdAt: string;
+        updatedAt: string;
     };
 }
 
-@Entity()
+@Entity({name: DbTable.ORDER_POSITION})
 export class OrderPosition {
     @AfterLoad()
     _convertNumerics() {

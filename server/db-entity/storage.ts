@@ -1,25 +1,26 @@
 import {toFinite} from 'lodash';
 import {Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, AfterLoad} from 'typeorm';
-import {Catalog} from '$db/entity/index';
+import {CatalogItem} from '$db-entity/entities';
+import {DbTable} from '$db-entity/tables';
 
-@Entity()
+@Entity({name: DbTable.STORAGE})
 export class Storage {
     @AfterLoad()
     _convertNumerics() {
         this.id = toFinite(this.id);
         this.cost = toFinite(this.cost);
-        this.catalogId = toFinite(this.catalogId);
+        this.catalogItemId = toFinite(this.catalogItemId);
     }
 
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({name: 'catalog_id'})
-    catalogId: number;
+    @Column({name: 'catalog_item_id'})
+    catalogItemId: number;
 
-    @OneToOne(() => Catalog)
-    @JoinColumn({name: 'catalog_id', referencedColumnName: 'id'})
-    catalog: Catalog;
+    @OneToOne(() => CatalogItem)
+    @JoinColumn({name: 'catalog_item_id', referencedColumnName: 'id'})
+    catalogItem: CatalogItem;
 
     @Column({type: 'numeric'})
     cost: number;

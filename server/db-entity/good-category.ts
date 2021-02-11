@@ -1,7 +1,8 @@
 import {Entity, PrimaryGeneratedColumn, Column, OneToMany} from 'typeorm';
-import {Catalog} from '$db/entity/index';
+import {Catalog} from '$db-entity/entities';
+import {DbTable} from '$db-entity/tables';
 
-@Entity()
+@Entity({name: DbTable.GOOD_CATEGORY})
 export class GoodCategory {
     @PrimaryGeneratedColumn()
     id: number;

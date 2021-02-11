@@ -3,7 +3,8 @@ import {Request, Response} from 'express';
 import {wrap} from 'async-middleware';
 import {dbManager} from 'app/lib/db-manager';
 import {requestCache} from 'app/lib/request-cache';
-import {DbTable, Storage} from '$db/entity/index';
+import {Storage} from '$db-entity/entities';
+import {DbTable} from '$db-entity/tables';
 
 interface Body {
     goods: {
@@ -27,19 +28,19 @@ export const checkCart = wrap<Request, Response>(async (req, res) => {
 
     const {goods} = req.body as Body;
 
-    const goodPublicIds = goods.map(({publicId}) => publicId);
+    const ids = goods.map(({publicId}) => publicId);
 
     const storageItems = await dbManager
         .getConnection()
         .getRepository(Storage)
         .createQueryBuilder(DbTable.STORAGE)
-        .leftJoinAndSelect(`${DbTable.STORAGE}.catalog`, DbTable.CATALOG)
-        .where(`${DbTable.CATALOG}.publicId IN (:...ids)`, {ids: goodPublicIds})
+        .innerJoinAndSelect(`${DbTable.STORAGE}.catalogItem`, DbTable.CATALOG_ITEM)
+        .where(`${DbTable.CATALOG_ITEM}.publicId IN (:...ids)`, {ids})
         .getMany();
 
     const acutalHash = keyBy(
         storageItems.map((item) => ({
-            publicId: item.catalog.publicId,
+            publicId: item.catalogItem.publicId,
             cost: item.cost,
             quantity: item.quantity
         })),
@@ -73,6 +74,6 @@ export const checkCart = wrap<Request, Response>(async (req, res) => {
         return res;
     }, {});
 
-    requestCache.set(req, diff, 60); // 1 min
+    requestCache.set(req, diff, 30); // 30 s
     res.json(diff);
 });
