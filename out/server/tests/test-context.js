@@ -9,7 +9,7 @@ const path_1 = __importDefault(require("path"));
 const nock_1 = __importDefault(require("nock"));
 const get_port_1 = __importDefault(require("get-port"));
 const db_manager_1 = require("../app/lib/db-manager");
-const index_1 = require("../db-entity/index");
+const tables_1 = require("../db-entity/tables");
 class TestContext {
     async getServerAddress() {
         if (this.url) {
@@ -34,18 +34,17 @@ class TestContext {
     }
     async clearDb() {
         const tables = [
-            index_1.DbTable.ORDER_POSITION,
-            index_1.DbTable.ORDER,
-            index_1.DbTable.USER,
-            index_1.DbTable.STORAGE,
-            index_1.DbTable.CATALOG,
-            index_1.DbTable.BRAND,
-            index_1.DbTable.PET_CATEGORY,
-            index_1.DbTable.GOOD_CATEGORY
+            tables_1.DbTable.ORDER_POSITION,
+            tables_1.DbTable.ORDER,
+            tables_1.DbTable.USER,
+            tables_1.DbTable.STORAGE,
+            tables_1.DbTable.CATALOG_ITEM,
+            tables_1.DbTable.CATALOG,
+            tables_1.DbTable.BRAND,
+            tables_1.DbTable.PET_CATEGORY,
+            tables_1.DbTable.GOOD_CATEGORY
         ];
-        await db_manager_1.dbManager
-            .getConnection()
-            .query(tables.map((table) => `TRUNCATE TABLE ${table} CASCADE;`).join('\n'));
+        await db_manager_1.dbManager.getConnection().query(tables.map((table) => `TRUNCATE TABLE ${table} CASCADE;`).join('\n'));
     }
     async startServer() {
         const port = String(await get_port_1.default());

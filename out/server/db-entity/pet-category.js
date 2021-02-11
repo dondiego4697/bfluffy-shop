@@ -11,7 +11,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PetCategory = void 0;
 const typeorm_1 = require("typeorm");
-const index_1 = require("./index");
+const entities_1 = require("./entities");
+const tables_1 = require("./tables");
 let PetCategory = class PetCategory {
 };
 __decorate([
@@ -27,11 +28,11 @@ __decorate([
     __metadata("design:type", String)
 ], PetCategory.prototype, "displayName", void 0);
 __decorate([
-    typeorm_1.OneToMany(() => index_1.Catalog, (catalog) => catalog.goodCategory),
+    typeorm_1.OneToMany(() => entities_1.Catalog, (catalog) => catalog.goodCategory),
     __metadata("design:type", Array)
 ], PetCategory.prototype, "catalog", void 0);
 PetCategory = __decorate([
-    typeorm_1.Entity()
+    typeorm_1.Entity({ name: tables_1.DbTable.PET_CATEGORY })
 ], PetCategory);
 exports.PetCategory = PetCategory;
 //# sourceMappingURL=pet-category.js.map

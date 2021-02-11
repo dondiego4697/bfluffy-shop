@@ -7,15 +7,16 @@ exports.getOrder = void 0;
 const boom_1 = __importDefault(require("@hapi/boom"));
 const async_middleware_1 = require("async-middleware");
 const db_manager_1 = require("../../../../lib/db-manager");
-const index_1 = require("../../../../../db-entity/index");
+const entities_1 = require("../../../../../db-entity/entities");
+const tables_1 = require("../../../../../db-entity/tables");
 exports.getOrder = async_middleware_1.wrap(async (req, res) => {
     const { public_id: publicId } = req.params;
     const order = await db_manager_1.dbManager
         .getConnection()
-        .getRepository(index_1.Order)
-        .createQueryBuilder(index_1.DbTable.ORDER)
-        .leftJoinAndSelect(`${index_1.DbTable.ORDER}.orderPositions`, index_1.DbTable.ORDER_POSITION)
-        .where(`${index_1.DbTable.ORDER}.public_id = :id`, { id: publicId })
+        .getRepository(entities_1.Order)
+        .createQueryBuilder(tables_1.DbTable.ORDER)
+        .leftJoinAndSelect(`${tables_1.DbTable.ORDER}.orderPositions`, tables_1.DbTable.ORDER_POSITION)
+        .where(`${tables_1.DbTable.ORDER}.public_id = :id`, { id: publicId })
         .getOne();
     if (!order) {
         throw boom_1.default.notFound();
@@ -36,18 +37,23 @@ exports.getOrder = async_middleware_1.wrap(async (req, res) => {
                 date: order.deliveryDate
             }
         },
-        positions: order.orderPositions.map((position) => ({
-            cost: position.cost,
-            quantity: position.quantity,
-            good: position.data.catalog.good,
-            pet: position.data.catalog.pet,
-            brand: position.data.catalog.brand,
-            manufacturerCountry: position.data.catalog.manufacturerCountry,
-            photoUrls: position.data.catalog.photoUrls,
-            rating: position.data.catalog.rating,
-            displayName: position.data.catalog.displayName,
-            description: position.data.catalog.description
-        }))
+        positions: order.orderPositions.map((position) => {
+            const { data } = position;
+            const { catalog, catalogItem } = data;
+            return {
+                cost: position.cost,
+                quantity: position.quantity,
+                good: catalog.good,
+                pet: catalog.pet,
+                brand: catalog.brand,
+                manufacturerCountry: catalog.manufacturerCountry,
+                rating: catalog.rating,
+                displayName: catalog.displayName,
+                description: catalog.description,
+                photoUrls: catalogItem.photoUrls,
+                weight: catalogItem.weight
+            };
+        })
     };
     res.json(result);
 });

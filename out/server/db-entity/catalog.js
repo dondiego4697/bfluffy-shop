@@ -12,14 +12,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Catalog = void 0;
 const lodash_1 = require("lodash");
 const typeorm_1 = require("typeorm");
-const index_1 = require("./index");
+const entities_1 = require("./entities");
+const tables_1 = require("./tables");
 let Catalog = class Catalog {
     _convertNumerics() {
         this.id = lodash_1.toFinite(this.id);
         this.goodCategoryId = lodash_1.toFinite(this.goodCategoryId);
         this.petCategoryId = lodash_1.toFinite(this.petCategoryId);
         this.brandId = lodash_1.toFinite(this.brandId);
-        this.weight = lodash_1.toFinite(this.weight);
     }
 };
 __decorate([
@@ -33,42 +33,38 @@ __decorate([
     __metadata("design:type", Number)
 ], Catalog.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column({ name: 'public_id' }),
-    __metadata("design:type", String)
-], Catalog.prototype, "publicId", void 0);
-__decorate([
-    typeorm_1.Column({ name: 'group_id' }),
-    __metadata("design:type", String)
-], Catalog.prototype, "groupId", void 0);
-__decorate([
     typeorm_1.Column({ name: 'good_category_id' }),
     __metadata("design:type", Number)
 ], Catalog.prototype, "goodCategoryId", void 0);
 __decorate([
-    typeorm_1.ManyToOne(() => index_1.GoodCategory, (goodCategory) => goodCategory.catalog),
+    typeorm_1.ManyToOne(() => entities_1.GoodCategory, (goodCategory) => goodCategory.catalog),
     typeorm_1.JoinColumn({ name: 'good_category_id', referencedColumnName: 'id' }),
-    __metadata("design:type", index_1.GoodCategory)
+    __metadata("design:type", entities_1.GoodCategory)
 ], Catalog.prototype, "goodCategory", void 0);
 __decorate([
     typeorm_1.Column({ name: 'pet_category_id' }),
     __metadata("design:type", Number)
 ], Catalog.prototype, "petCategoryId", void 0);
 __decorate([
-    typeorm_1.ManyToOne(() => index_1.PetCategory, (petCategory) => petCategory.catalog),
+    typeorm_1.ManyToOne(() => entities_1.PetCategory, (petCategory) => petCategory.catalog),
     typeorm_1.JoinColumn({ name: 'pet_category_id', referencedColumnName: 'id' }),
-    __metadata("design:type", index_1.PetCategory)
+    __metadata("design:type", entities_1.PetCategory)
 ], Catalog.prototype, "petCategory", void 0);
 __decorate([
     typeorm_1.Column({ name: 'brand_id' }),
     __metadata("design:type", Number)
 ], Catalog.prototype, "brandId", void 0);
 __decorate([
-    typeorm_1.ManyToOne(() => index_1.Brand, (brand) => brand.catalog),
+    typeorm_1.ManyToOne(() => entities_1.Brand, (brand) => brand.catalog),
     typeorm_1.JoinColumn({ name: 'brand_id', referencedColumnName: 'id' }),
-    __metadata("design:type", index_1.Brand)
+    __metadata("design:type", entities_1.Brand)
 ], Catalog.prototype, "brand", void 0);
 __decorate([
-    typeorm_1.Column({ nullable: true, name: 'display_name' }),
+    typeorm_1.OneToMany(() => entities_1.CatalogItem, (catalogItem) => catalogItem.catalog),
+    __metadata("design:type", Array)
+], Catalog.prototype, "catalogItems", void 0);
+__decorate([
+    typeorm_1.Column({ name: 'display_name' }),
     __metadata("design:type", String)
 ], Catalog.prototype, "displayName", void 0);
 __decorate([
@@ -84,14 +80,6 @@ __decorate([
     __metadata("design:type", String)
 ], Catalog.prototype, "manufacturerCountry", void 0);
 __decorate([
-    typeorm_1.Column({ nullable: true, type: 'jsonb', name: 'photo_urls' }),
-    __metadata("design:type", Array)
-], Catalog.prototype, "photoUrls", void 0);
-__decorate([
-    typeorm_1.Column({ nullable: true }),
-    __metadata("design:type", Number)
-], Catalog.prototype, "weight", void 0);
-__decorate([
     typeorm_1.Column({ name: 'created_at' }),
     __metadata("design:type", Date)
 ], Catalog.prototype, "createdAt", void 0);
@@ -100,7 +88,7 @@ __decorate([
     __metadata("design:type", Date)
 ], Catalog.prototype, "updatedAt", void 0);
 Catalog = __decorate([
-    typeorm_1.Entity()
+    typeorm_1.Entity({ name: tables_1.DbTable.CATALOG })
 ], Catalog);
 exports.Catalog = Catalog;
 //# sourceMappingURL=catalog.js.map

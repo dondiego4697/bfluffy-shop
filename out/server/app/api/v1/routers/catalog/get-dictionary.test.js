@@ -24,24 +24,24 @@ describe(PATH, () => {
         const { statusCode, body } = await got_1.default.get(`${url}${PATH}`, {
             responseType: 'json'
         });
-        expect(statusCode).toEqual(200);
+        expect(statusCode).toBe(200);
         expect(body).toEqual({
             brands: [
                 {
                     code: brand.code,
-                    displayName: brand.displayName
+                    name: brand.displayName
                 }
             ],
-            goodCategories: [
+            goods: [
                 {
                     code: good.code,
-                    displayName: good.displayName
+                    name: good.displayName
                 }
             ],
-            petCategories: [
+            pets: [
                 {
                     code: pet.code,
-                    displayName: pet.displayName
+                    name: pet.displayName
                 }
             ]
         });

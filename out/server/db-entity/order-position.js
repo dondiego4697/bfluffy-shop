@@ -12,7 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderPosition = void 0;
 const lodash_1 = require("lodash");
 const typeorm_1 = require("typeorm");
-const index_1 = require("./index");
+const entities_1 = require("./entities");
+const tables_1 = require("./tables");
 let OrderPosition = class OrderPosition {
     _convertNumerics() {
         this.id = lodash_1.toFinite(this.id);
@@ -31,9 +32,9 @@ __decorate([
     __metadata("design:type", Number)
 ], OrderPosition.prototype, "id", void 0);
 __decorate([
-    typeorm_1.ManyToOne(() => index_1.Order, (order) => order.orderPositions),
+    typeorm_1.ManyToOne(() => entities_1.Order, (order) => order.orderPositions),
     typeorm_1.JoinColumn({ name: 'order_id', referencedColumnName: 'id' }),
-    __metadata("design:type", index_1.Order)
+    __metadata("design:type", entities_1.Order)
 ], OrderPosition.prototype, "order", void 0);
 __decorate([
     typeorm_1.Column({ name: 'order_id' }),
@@ -56,7 +57,7 @@ __decorate([
     __metadata("design:type", Date)
 ], OrderPosition.prototype, "createdAt", void 0);
 OrderPosition = __decorate([
-    typeorm_1.Entity()
+    typeorm_1.Entity({ name: tables_1.DbTable.ORDER_POSITION })
 ], OrderPosition);
 exports.OrderPosition = OrderPosition;
 //# sourceMappingURL=order-position.js.map

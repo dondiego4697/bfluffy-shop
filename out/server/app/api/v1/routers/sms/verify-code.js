@@ -7,17 +7,13 @@ exports.verifyCode = void 0;
 const boom_1 = __importDefault(require("@hapi/boom"));
 const async_middleware_1 = require("async-middleware");
 const db_manager_1 = require("../../../../lib/db-manager");
-const index_1 = require("../../../../../db-entity/index");
 const csrf_1 = require("../../../../lib/csrf");
 const config_1 = require("../../../../config");
+const entities_1 = require("../../../../../db-entity/entities");
 exports.verifyCode = async_middleware_1.wrap(async (req, res) => {
     const { phone, code } = req.body;
-    const connection = db_manager_1.dbManager.getConnection();
-    const user = await connection
-        .getRepository(index_1.User)
-        .createQueryBuilder(index_1.DbTable.USER)
-        .where(`${index_1.DbTable.USER}.phone = :phone`, { phone })
-        .getOne();
+    const { manager } = db_manager_1.dbManager.getConnection().getRepository(entities_1.User);
+    const user = await manager.findOne(entities_1.User, { phone: String(phone) });
     if (!user) {
         throw boom_1.default.notFound();
     }

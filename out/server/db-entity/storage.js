@@ -12,12 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Storage = void 0;
 const lodash_1 = require("lodash");
 const typeorm_1 = require("typeorm");
-const index_1 = require("./index");
+const entities_1 = require("./entities");
+const tables_1 = require("./tables");
 let Storage = class Storage {
     _convertNumerics() {
         this.id = lodash_1.toFinite(this.id);
         this.cost = lodash_1.toFinite(this.cost);
-        this.catalogId = lodash_1.toFinite(this.catalogId);
+        this.catalogItemId = lodash_1.toFinite(this.catalogItemId);
     }
 };
 __decorate([
@@ -31,14 +32,14 @@ __decorate([
     __metadata("design:type", Number)
 ], Storage.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column({ name: 'catalog_id' }),
+    typeorm_1.Column({ name: 'catalog_item_id' }),
     __metadata("design:type", Number)
-], Storage.prototype, "catalogId", void 0);
+], Storage.prototype, "catalogItemId", void 0);
 __decorate([
-    typeorm_1.OneToOne(() => index_1.Catalog),
-    typeorm_1.JoinColumn({ name: 'catalog_id', referencedColumnName: 'id' }),
-    __metadata("design:type", index_1.Catalog)
-], Storage.prototype, "catalog", void 0);
+    typeorm_1.OneToOne(() => entities_1.CatalogItem),
+    typeorm_1.JoinColumn({ name: 'catalog_item_id', referencedColumnName: 'id' }),
+    __metadata("design:type", entities_1.CatalogItem)
+], Storage.prototype, "catalogItem", void 0);
 __decorate([
     typeorm_1.Column({ type: 'numeric' }),
     __metadata("design:type", Number)
@@ -56,7 +57,7 @@ __decorate([
     __metadata("design:type", Date)
 ], Storage.prototype, "updatedAt", void 0);
 Storage = __decorate([
-    typeorm_1.Entity()
+    typeorm_1.Entity({ name: tables_1.DbTable.STORAGE })
 ], Storage);
 exports.Storage = Storage;
 //# sourceMappingURL=storage.js.map

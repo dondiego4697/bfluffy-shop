@@ -35,8 +35,6 @@ export const cancelOrder = wrap<Request, Response>(async (req, res) => {
             .where('id = :id', {id: order.id})
             .execute();
 
-        console.log(order.orderPositions);
-
         await pMap(
             order.orderPositions,
             async (position) => {

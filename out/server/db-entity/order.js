@@ -12,7 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Order = exports.OrderResolution = exports.OrderStatus = void 0;
 const lodash_1 = require("lodash");
 const typeorm_1 = require("typeorm");
-const index_1 = require("./index");
+const entities_1 = require("./entities");
+const tables_1 = require("./tables");
 var OrderStatus;
 (function (OrderStatus) {
     OrderStatus["CREATED"] = "CREATED";
@@ -23,7 +24,7 @@ var OrderResolution;
 (function (OrderResolution) {
     OrderResolution["SUCCESS"] = "SUCCESS";
     OrderResolution["CANCELLED"] = "CANCELLED";
-    OrderResolution["ANNULATED"] = "ANNULATED";
+    OrderResolution["ANNULATED"] = "ANNULATED"; // Со стороны нас
 })(OrderResolution = exports.OrderResolution || (exports.OrderResolution = {}));
 let Order = class Order {
     _convertNumerics() {
@@ -41,7 +42,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Order.prototype, "id", void 0);
 __decorate([
-    typeorm_1.OneToMany(() => index_1.OrderPosition, (position) => position.order),
+    typeorm_1.OneToMany(() => entities_1.OrderPosition, (position) => position.order),
     __metadata("design:type", Array)
 ], Order.prototype, "orderPositions", void 0);
 __decorate([
@@ -69,10 +70,6 @@ __decorate([
     __metadata("design:type", Date)
 ], Order.prototype, "deliveryDate", void 0);
 __decorate([
-    typeorm_1.Column({ name: 'created_at' }),
-    __metadata("design:type", Date)
-], Order.prototype, "createdAt", void 0);
-__decorate([
     typeorm_1.Column(),
     __metadata("design:type", String)
 ], Order.prototype, "status", void 0);
@@ -80,8 +77,12 @@ __decorate([
     typeorm_1.Column({ nullable: true }),
     __metadata("design:type", String)
 ], Order.prototype, "resolution", void 0);
+__decorate([
+    typeorm_1.Column({ name: 'created_at' }),
+    __metadata("design:type", Date)
+], Order.prototype, "createdAt", void 0);
 Order = __decorate([
-    typeorm_1.Entity({ name: 'orders' })
+    typeorm_1.Entity({ name: tables_1.DbTable.ORDER })
 ], Order);
 exports.Order = Order;
 //# sourceMappingURL=order.js.map

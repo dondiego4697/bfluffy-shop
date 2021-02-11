@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
+const tables_1 = require("./tables");
 let User = class User {
 };
 __decorate([
@@ -30,11 +31,15 @@ __decorate([
     __metadata("design:type", Date)
 ], User.prototype, "lastSmsCodeAt", void 0);
 __decorate([
+    typeorm_1.Column({ name: 'is_root' }),
+    __metadata("design:type", Boolean)
+], User.prototype, "isRoot", void 0);
+__decorate([
     typeorm_1.Column({ name: 'created_at' }),
     __metadata("design:type", Date)
 ], User.prototype, "createdAt", void 0);
 User = __decorate([
-    typeorm_1.Entity({ name: 'users' })
+    typeorm_1.Entity({ name: tables_1.DbTable.USER })
 ], User);
 exports.User = User;
 //# sourceMappingURL=user.js.map

@@ -27,7 +27,7 @@ describe(PATH, () => {
             responseType: 'json'
         });
 
-        expect(statusCode).toEqual(200);
+        expect(statusCode).toBe(200);
         expect(body).toEqual({
             brands: [
                 {

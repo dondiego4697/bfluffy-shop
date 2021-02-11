@@ -1,10 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DbTable = exports.User = exports.Storage = exports.PetCategory = exports.Order = exports.OrderPosition = exports.GoodCategory = exports.Catalog = exports.Brand = void 0;
+exports.CatalogItem = exports.User = exports.Storage = exports.PetCategory = exports.Order = exports.OrderPosition = exports.GoodCategory = exports.Catalog = exports.Brand = void 0;
 const brand_1 = require("./brand");
 Object.defineProperty(exports, "Brand", { enumerable: true, get: function () { return brand_1.Brand; } });
 const catalog_1 = require("./catalog");
 Object.defineProperty(exports, "Catalog", { enumerable: true, get: function () { return catalog_1.Catalog; } });
+const catalog_item_1 = require("./catalog-item");
+Object.defineProperty(exports, "CatalogItem", { enumerable: true, get: function () { return catalog_item_1.CatalogItem; } });
 const good_category_1 = require("./good-category");
 Object.defineProperty(exports, "GoodCategory", { enumerable: true, get: function () { return good_category_1.GoodCategory; } });
 const order_position_1 = require("./order-position");
@@ -17,15 +19,4 @@ const storage_1 = require("./storage");
 Object.defineProperty(exports, "Storage", { enumerable: true, get: function () { return storage_1.Storage; } });
 const user_1 = require("./user");
 Object.defineProperty(exports, "User", { enumerable: true, get: function () { return user_1.User; } });
-var DbTable;
-(function (DbTable) {
-    DbTable["USER"] = "users";
-    DbTable["BRAND"] = "brand";
-    DbTable["CATALOG"] = "catalog";
-    DbTable["GOOD_CATEGORY"] = "good_category";
-    DbTable["PET_CATEGORY"] = "pet_category";
-    DbTable["STORAGE"] = "storage";
-    DbTable["ORDER"] = "orders";
-    DbTable["ORDER_POSITION"] = "order_position";
-})(DbTable = exports.DbTable || (exports.DbTable = {}));
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=entities.js.map

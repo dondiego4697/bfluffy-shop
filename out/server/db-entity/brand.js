@@ -11,7 +11,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Brand = void 0;
 const typeorm_1 = require("typeorm");
-const index_1 = require("./index");
+const entities_1 = require("./entities");
+const tables_1 = require("./tables");
 let Brand = class Brand {
 };
 __decorate([
@@ -27,11 +28,11 @@ __decorate([
     __metadata("design:type", String)
 ], Brand.prototype, "displayName", void 0);
 __decorate([
-    typeorm_1.OneToMany(() => index_1.Catalog, (catalog) => catalog.goodCategory),
+    typeorm_1.OneToMany(() => entities_1.Catalog, (catalog) => catalog.goodCategory),
     __metadata("design:type", Array)
 ], Brand.prototype, "catalog", void 0);
 Brand = __decorate([
-    typeorm_1.Entity()
+    typeorm_1.Entity({ name: tables_1.DbTable.BRAND })
 ], Brand);
 exports.Brand = Brand;
 //# sourceMappingURL=brand.js.map

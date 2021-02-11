@@ -162,5 +162,5 @@ export const createOrder = wrap<Request, Response>(async (req, res) => {
 
     smsProvider.sendSms(phone, `Ваш заказ успешно создан: ${url.toString()}`);
 
-    res.json({id: orderPublicId});
+    res.json({publicId: orderPublicId});
 });

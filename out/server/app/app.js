@@ -20,6 +20,7 @@ const cors_1 = require("./middleware/cors");
 const request_id_1 = require("./middleware/request-id");
 const logger_1 = require("./middleware/logger");
 const v1_1 = require("./api/v1");
+const error_1 = require("../service/error/error");
 const bodyParserJson = body_parser_1.default.json({
     limit: '5mb',
     strict: false
@@ -44,6 +45,9 @@ exports.app = express_1.default()
     .use((error, req, res, _next) => {
     if (error.isBoom) {
         sendError(res, error);
+    }
+    else if (error instanceof error_1.ClientError) {
+        sendError(res, boom_1.default.badRequest(error.clientErrorCode));
     }
     else {
         req.logger.error(`unknown error: ${error.message}`);
