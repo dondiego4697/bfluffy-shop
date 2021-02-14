@@ -1,16 +1,18 @@
 INSERT INTO pet_category (code, display_name) VALUES
-    ('cats', 'Кошки'),
-    ('dogs', 'Собаки');
+    ('cats', 'кошки'),
+    ('kitten', 'котята'),
+    ('dogs', 'собаки'),
+    ('puppy', 'щенки');
 
 INSERT INTO good_category (code, display_name) VALUES
-    ('veterinarnaya_apteka', 'Ветеринарная аптека'),
-    ('veterinarnye_korma', 'Ветеринарные корма'),
-    ('vitaminy_dobavki', 'Витамины, добавки'),
-    ('lakomstva', 'Лакомства'),
-    ('konservy', 'Консервы'),
-    ('naturalnaya_eda', 'Натуральная еда'),
-    ('suhie_korma', 'Сухие корма'),
-    ('holistik_korma', 'Холистик корма');
+    ('veterinarnaya_apteka', 'ветеринарная аптека'),
+    ('veterinarnye_korma', 'ветеринарные корма'),
+    ('vitaminy_dobavki', 'витамины, добавки'),
+    ('lakomstva', 'лакомства'),
+    ('konservy', 'консервы'),
+    ('naturalnaya_eda', 'натуральная еда'),
+    ('suhie_korma', 'сухие корма'),
+    ('holistik_korma', 'холистик корма');
     
 
 INSERT INTO brand (code, display_name) VALUES 

@@ -94,7 +94,7 @@ async function createCatalogItem(params: CreateCatalogItemParams) {
 
     const catalogItem = manager.create(CatalogItem, {
         catalogId: params.catalogId,
-        weight: faker.random.float() % 30,
+        weightKg: faker.random.float() % 30,
         photoUrls: [faker.image.image()]
     });
 
@@ -211,7 +211,7 @@ async function createOrderPosition(params: CreateOrderPositionParams) {
                     id: catalogItem.id,
                     publicId: catalogItem.publicId,
                     photoUrls: catalogItem.photoUrls,
-                    weight: catalogItem.weight,
+                    weightKg: catalogItem.weightKg,
                     createdAt: catalogItem.createdAt.toISOString(),
                     updatedAt: catalogItem.updatedAt.toISOString()
                 }

@@ -49,8 +49,9 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
                 brand_id INTEGER NOT NULL,
                 pet_category_id INTEGER NOT NULL,
 
-                display_name TEXT NOT NULL,
+                display_name TEXT,
                 description TEXT,
+
                 rating REAL NOT NULL DEFAULT 0,
                 manufacturer_country TEXT,
 
@@ -77,7 +78,7 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
                 catalog_id BIGINT NOT NULL,
 
                 photo_urls JSONB NOT NULL DEFAULT '[]'::jsonb,
-                weight NUMERIC(9, 2),
+                weight_kg NUMERIC(9, 2),
 
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,

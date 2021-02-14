@@ -36,7 +36,7 @@ export interface OrderPositionData {
         id: number;
         publicId: string;
         photoUrls: string[];
-        weight?: number;
+        weightKg?: number;
         createdAt: string;
         updatedAt: string;
     };

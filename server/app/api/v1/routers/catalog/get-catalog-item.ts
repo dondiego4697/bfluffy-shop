@@ -59,7 +59,7 @@ export const getCatalogItem = wrap<Request, Response>(async (req, res) => {
         updatedAt: catalog.updatedAt,
         items: catalog.catalogItems.map((item) => ({
             publicId: item.publicId,
-            weight: item.weight,
+            weightKg: item.weightKg,
             photoUrls: item.photoUrls || [],
             createdAt: item.createdAt,
             updatedAt: item.updatedAt

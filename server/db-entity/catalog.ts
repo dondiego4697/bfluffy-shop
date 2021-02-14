@@ -40,8 +40,8 @@ export class Catalog {
     @OneToMany(() => CatalogItem, (catalogItem) => catalogItem.catalog)
     catalogItems: CatalogItem[];
 
-    @Column({name: 'display_name'})
-    displayName: string;
+    @Column({nullable: true, name: 'display_name'})
+    displayName?: string;
 
     @Column({nullable: true})
     description?: string;

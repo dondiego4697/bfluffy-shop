@@ -84,14 +84,14 @@ describe(PATH, () => {
                     {
                         publicId: catalogItems[0].publicId,
                         photoUrls: catalogItems[0].photoUrls,
-                        weight: catalogItems[0].weight,
+                        weightKg: catalogItems[0].weightKg,
                         createdAt: catalogItems[0].createdAt.toISOString(),
                         updatedAt: catalogItems[0].updatedAt.toISOString()
                     },
                     {
                         publicId: catalogItems[1].publicId,
                         photoUrls: catalogItems[1].photoUrls,
-                        weight: catalogItems[1].weight,
+                        weightKg: catalogItems[1].weightKg,
                         createdAt: catalogItems[1].createdAt.toISOString(),
                         updatedAt: catalogItems[1].updatedAt.toISOString()
                     }

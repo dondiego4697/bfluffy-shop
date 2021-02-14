@@ -66,7 +66,7 @@ describe(`GET ${PATH}`, () => {
                         displayName: catalog.displayName,
                         description: catalog.description,
                         photoUrls: catalogItem.photoUrls,
-                        weight: catalogItem.weight
+                        weightKg: catalogItem.weightKg
                     };
                 }),
                 'cost'

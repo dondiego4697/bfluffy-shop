@@ -51,7 +51,7 @@ export const getOrder = wrap<Request, Response>(async (req, res) => {
                 displayName: catalog.displayName,
                 description: catalog.description,
                 photoUrls: catalogItem.photoUrls,
-                weight: catalogItem.weight
+                weightKg: catalogItem.weightKg
             };
         })
     };

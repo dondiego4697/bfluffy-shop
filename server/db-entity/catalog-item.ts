@@ -24,8 +24,8 @@ export class CatalogItem {
     @JoinColumn({name: 'catalog_id', referencedColumnName: 'id'})
     catalog: Catalog;
 
-    @Column({nullable: true})
-    weight?: number;
+    @Column({nullable: true, name: 'weight_kg'})
+    weightKg?: number;
 
     @Column({type: 'jsonb', name: 'photo_urls'})
     photoUrls: string[];

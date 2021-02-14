@@ -95,7 +95,7 @@ export const createOrder = wrap<Request, Response>(async (req, res) => {
                         id: catalogItem.id,
                         publicId: catalogItem.publicId,
                         photoUrls: catalogItem.photoUrls,
-                        weight: catalogItem.weight,
+                        weightKg: catalogItem.weightKg,
                         createdAt: moment(catalogItem.createdAt).toISOString(),
                         updatedAt: moment(catalogItem.updatedAt).toISOString()
                     },

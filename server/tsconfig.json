@@ -30,7 +30,8 @@
             "$db-entity/*": ["db-entity/*"],
             "$logger/*": ["service/logger/*"],
             "$error/*": ["service/error/*"],
-            "$sms/*": ["service/sms/*"]
+            "$sms/*": ["service/sms/*"],
+            "$search/*": ["service/search/*"]
         },
         "types": ["node", "express", "jest"],
         "plugins": [{"transform": "@zerollup/ts-transform-paths"}]
