@@ -21,7 +21,7 @@ interface SearchItem {
 }
 
 export class CatalogSearchProvider {
-    protected indexName: string = 'catalog';
+    protected indexName: string = `catalog_${config['algolia.env']}`;
     protected client: SearchClient;
 
     protected petCatagoryDict: Record<string, string> = {
