@@ -19,6 +19,8 @@ export interface Config {
     'header.requestId': string;
     'app.cache.enable': boolean;
     'app.host': string;
+    'algolia.token': string;
+    'algolia.project': string;
     'tests.enable': boolean;
     db: DB;
 }
@@ -34,6 +36,8 @@ const production: Config = {
     'csrf.token.ttl': 60 * 60 * 1000, // 1h
     'app.cache.enable': true,
     'app.host': 'https://some_host.ru',
+    'algolia.project': process.env.ALGOLIA_PROJECT!,
+    'algolia.token': process.env.ALGOLIA_TOKEN!,
     db: {
         hosts: ['localhost'],
         port: 6432,
@@ -92,3 +96,6 @@ const configForEnv = configs.get(env);
 export const config = configForEnv!;
 
 assert(config, `there is no configuration for environment "${env}"`);
+
+assert(config['algolia.project'], `there is no algolia project`);
+assert(config['algolia.token'], `there is no algolia token`);

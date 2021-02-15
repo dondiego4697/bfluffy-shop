@@ -1,210 +1,145 @@
-// import pMap from 'p-map';
-// import got, {Got} from 'got';
-// import {config} from 'app/config';
-// import {dbManager} from 'app/lib/db-manager';
-// import {Catalog, Storage} from '$db-entity/entities';
-// import {DbTable} from '$db-entity/tables';
-// import {logger} from '$logger/logger';
+import algoliasearch, {SearchClient} from 'algoliasearch'
+import {dbManager} from 'app/lib/db-manager';
+import {Catalog, Storage} from '$db-entity/entities';
+import {DbTable} from '$db-entity/tables';
+import {config} from 'app/config';
+import {logger} from '$logger/logger';
 
-// interface SearchItem {
-//     title: string;
-//     searchMeta: {
-//         brandCode?: string;
-//         goodCategoryCode?: string;
-//         petCategoryCode?: string;
-//         catalogItemPublicId?: string;
-//     }
-// }
+interface SearchItem {
+    brand: string;
+    good: string;
+    pet: string;
+    weightKg?: string;
+    exist?: boolean;
+    searchMeta: {
+        brandCode: string;
+        goodCategoryCode: string;
+        petCategoryCode: string;
+    } | {
+        publicId: string;
+    };
+}
 
-// export class CatalogSearchProvider {
-//     protected logGroup = 'catalog_search_provider';
-//     protected searchIndex = 'catalog';
+export class CatalogSearchProvider {
+    protected indexName: string = 'catalog';
+    protected client: SearchClient;
+    protected petCatagoryDict: Record<string, string> = {
+        cats: 'кошек',
+        kitten: 'котят',
+        dogs: 'собак',
+        puppy: 'щенков'
+    };
 
-//     protected petCatagoryDict: Record<string, string> = {
-//         cats: 'кошек',
-//         kitten: 'котят',
-//         dogs: 'собак',
-//         puppy: 'щенков'
-//     };
+    constructor() {
+        this.client = algoliasearch(config['algolia.project'], config['algolia.token']);
 
-//     protected client: Got;
+        this.initSearch();
+    }
 
-//     constructor() {
-//         this.client = got.extend({
-//             prefixUrl: `http://localhost:${config['elastic.port']}`,
-//             responseType: 'json',
-//             throwHttpErrors: false,
-//             hooks: {
-//                 beforeRequest: [
-//                     (options) => {
-//                         logger.info('request', {
-//                             group: this.logGroup,
-//                             url: options.url,
-//                             body: options.json,
-//                             method: options.method
-//                         });
-//                     }
-//                 ],
-//                 beforeError: [
-//                     (error) => {
-//                         logger.error('error', {
-//                             group: this.logGroup,
-//                             url: error.request?.requestUrl,
-//                             error: error.message,
-//                             statusCode: error.response?.statusCode,
-//                             body: error.response?.body
-//                         });
+    protected static formWeight(kg: number) {
+        if (kg < 1) {
+            return `${kg * 1000} г.`;
+        }
 
-//                         return error;
-//                     }
-//                 ],
-//                 afterResponse: [
-//                     (response) => {
-//                         logger.info('response', {
-//                             group: this.logGroup,
-//                             url: response.request.requestUrl,
-//                             statusCode: response.statusCode,
-//                             body: response.body,
-//                             method: response.method
-//                         });
+        return `${kg} кг.`;
+    }
 
-//                         return response;
-//                     }
-//                 ]
-//             }
-//         });
+    protected async getCurrentCatalog() {
+        const connection = await dbManager.getConnection();
 
-//         this.initSearch();
-//     }
+        const [
+            storageList,
+            catalogList
+        ] = await Promise.all([
+            connection
+                .getRepository(Storage)
+                .createQueryBuilder(DbTable.STORAGE)
+                .innerJoinAndSelect(`${DbTable.STORAGE}.catalogItem`, DbTable.CATALOG_ITEM)
+                .where(`${DbTable.STORAGE}.quantity > 0`)
+                .getMany(),
+            connection
+                .getRepository(Catalog)
+                .createQueryBuilder(DbTable.CATALOG)
+                .innerJoinAndSelect(`${DbTable.CATALOG}.brand`, DbTable.BRAND)
+                .innerJoinAndSelect(`${DbTable.CATALOG}.petCategory`, DbTable.PET_CATEGORY)
+                .innerJoinAndSelect(`${DbTable.CATALOG}.goodCategory`, DbTable.GOOD_CATEGORY)
+                .leftJoinAndSelect(`${DbTable.CATALOG}.catalogItems`, DbTable.CATALOG_ITEM)
+                .getMany()
+        ]);
 
-//     protected static formWeight(kg: number) {
-//         if (kg < 1) {
-//             return `${kg * 1000} г.`;
-//         }
+        return {
+            catalogList,
+            existedCatalogItems: new Set(storageList.map(({catalogItem}) => catalogItem.publicId))
+        };
+    }
 
-//         return `${kg} кг.`;
-//     }
+    protected async getSearchDocuments() {
+        const {catalogList, existedCatalogItems} = await this.getCurrentCatalog();
 
-//     protected async getCurrentCatalog() {
-//         const connection = await dbManager.getConnection();
+        const result: SearchItem[] = [];
 
-//         const [
-//             storageList,
-//             catalogList
-//         ] = await Promise.all([
-//             connection
-//                 .getRepository(Storage)
-//                 .createQueryBuilder(DbTable.STORAGE)
-//                 .innerJoinAndSelect(`${DbTable.STORAGE}.catalogItem`, DbTable.CATALOG_ITEM)
-//                 .where(`${DbTable.STORAGE}.quantity > 0`)
-//                 .getMany(),
-//             connection
-//                 .getRepository(Catalog)
-//                 .createQueryBuilder(DbTable.CATALOG)
-//                 .innerJoinAndSelect(`${DbTable.CATALOG}.brand`, DbTable.BRAND)
-//                 .innerJoinAndSelect(`${DbTable.CATALOG}.petCategory`, DbTable.PET_CATEGORY)
-//                 .innerJoinAndSelect(`${DbTable.CATALOG}.goodCategory`, DbTable.GOOD_CATEGORY)
-//                 .leftJoinAndSelect(`${DbTable.CATALOG}.catalogItems`, DbTable.CATALOG_ITEM)
-//                 .getMany()
-//         ]);
+        catalogList.forEach((catalog) => {
+            const brand = catalog.brand.displayName;
 
-//         return {
-//             catalogList,
-//             existedCatalogItems: new Set(storageList.map(({catalogItem}) => catalogItem.publicId))
-//         };
-//     }
+            const goodRaw = catalog.goodCategory.displayName.toLowerCase();
+            const good = goodRaw.slice(0, 1).toUpperCase() + goodRaw.slice(1);
 
-//     protected async getSearchDocuments() {
-//         // <brand> <good> <pet>
-//         // <brand> <good> <pet> <...params>
+            const petRaw = this.petCatagoryDict[catalog.petCategory.code].toLowerCase();
+            const pet = `Для ${petRaw}`;
 
-//         const {catalogList} = await this.getCurrentCatalog();
+            result.push({
+                brand,
+                good,
+                pet,
+                searchMeta: {
+                    brandCode: catalog.brand.code,
+                    goodCategoryCode: catalog.goodCategory.code,
+                    petCategoryCode: catalog.petCategory.code
+                }
+            });
 
-//         const result: SearchItem[] = [];
+            catalog.catalogItems.forEach(({publicId, weightKg}) => {
+                result.push({
+                    brand,
+                    good,
+                    pet,
+                    weightKg: weightKg ? CatalogSearchProvider.formWeight(weightKg) : undefined,
+                    exist: existedCatalogItems.has(publicId),
+                    searchMeta: {
+                        publicId
+                    }
+                })
+            });
+        });
 
-//         catalogList.forEach((catalog) => {
-//             const brand = catalog.brand.displayName;
+        return result;
+    }
 
-//             const goodRaw = catalog.goodCategory.displayName.toLowerCase();
-//             const good = goodRaw.slice(0, 1).toUpperCase() + goodRaw.slice(1);
+    protected async initSearch() {
+        const documents = await this.getSearchDocuments();
+        const index = this.client.initIndex(this.indexName);
 
-//             const petRaw = this.petCatagoryDict[catalog.petCategory.code].toLowerCase();
-//             const pet = `для ${petRaw}`;
+        try {
+            await index.replaceAllObjects(documents, {
+                safe: true,
+                autoGenerateObjectIDIfNotExist: true
+            });
 
-//             result.push({
-//                 title: [brand, good, pet].join(' '),
-//                 searchMeta: {
-//                     brandCode: catalog.brand.code,
-//                     goodCategoryCode: catalog.goodCategory.code,
-//                     petCategoryCode: catalog.petCategory.code
-//                 }
-//             });
+            await index.setSettings({
+                searchableAttributes: ['brand', 'good', 'pet', 'weightKg'],
+                ranking: ['desc(exist)']
+            });
+        } catch (error) {
+            logger.error(error, {
+                group: 'algolia'
+            });
+        }
+    }
 
-//             catalog.catalogItems.forEach(({publicId, weightKg}) => {
-//                 result.push({
-//                     title: [
-//                         brand, good, pet,
-//                         weightKg ? CatalogSearchProvider.formWeight(weightKg) : undefined
-//                     ].filter(Boolean).join(' '),
-//                     searchMeta: {
-//                         brandCode: catalog.brand.code,
-//                         goodCategoryCode: catalog.goodCategory.code,
-//                         petCategoryCode: catalog.petCategory.code,
-//                         catalogItemPublicId: publicId
-//                     }
-//                 });
-//             });
-//         });
-
-//         return result;
-//     }
-
-//     protected async initSearch() {
-//         const searchItems = await this.getSearchDocuments();
-
-//         await this.client.delete(this.searchIndex);
-//         await this.client.put(this.searchIndex, {
-//             json: {
-//                 settings: {
-//                     max_ngram_diff: 20,
-//                     analysis: {
-//                         analyzer: {
-//                             substring_search: {
-//                                 type: 'custom',
-//                                 tokenizer: 'standard',
-//                                 filter: ['lowercase', 'substring']
-//                             }
-//                         },
-//                         filter: {
-//                             substring: {
-//                                 type: 'ngram',
-//                                 min_gram: 1,
-//                                 max_gram: 15
-//                             }
-//                         }
-//                     }
-//                 },
-//                 mappings: {
-//                     properties: {
-//                         title: {
-//                             type: 'text',
-//                             analyzer: 'substring_search'
-//                         }
-//                     }
-//                 }
-//             }
-//         });
-
-//         await pMap(searchItems, async (item) => {
-//             await this.client.post(`${this.searchIndex}/_doc`, {
-//                 searchParams: {
-//                     refresh: true
-//                 },
-//                 json: {
-//                     title: item.title,
-//                     searchMeta: item.searchMeta
-//                 }
-//             });
-//         }, {concurrency: 10});
-//     }
-// }
+    public search(query: string) {
+        return this.client.search<SearchItem>([{
+            indexName: this.indexName,
+            query
+        }]);
+    }
+}

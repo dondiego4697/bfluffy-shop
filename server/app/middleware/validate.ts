@@ -11,7 +11,7 @@ export function bodyValidate(schema: Joi.Schema, options: Joi.ValidationOptions 
     };
 }
 
-export function queryValidat(schema: Joi.Schema, options: Joi.ValidationOptions = {}): RequestHandler {
+export function queryValidate(schema: Joi.Schema, options: Joi.ValidationOptions = {}): RequestHandler {
     return (req, _res, next) => {
         const query = validateJoiSchema(schema, req.query, options);
 
