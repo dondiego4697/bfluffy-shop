@@ -1,4 +1,4 @@
-import {createConnection, getConnection} from 'typeorm';
+import typeorm, {createConnection} from 'typeorm';
 import {config} from 'app/config';
 import {
     Brand,
@@ -13,15 +13,11 @@ import {
 } from '$db-entity/entities';
 
 class DbManager {
-    public isActive = false;
+    protected connection: typeorm.Connection;
+    protected connectionDeffered: Promise<typeorm.Connection>;
 
     constructor() {
-        this.init();
-    }
-
-    protected async init() {
-        // TODO master/replice
-        await createConnection({
+        this.connectionDeffered = createConnection({
             type: 'postgres',
             replication: {
                 master: {
@@ -47,11 +43,15 @@ class DbManager {
             }
         });
 
-        this.isActive = true;
+        this.connectionDeffered.then((connection) => {
+            this.connection = connection;
+        });
     }
 
-    public getConnection() {
-        return getConnection();
+    public async getConnection() {
+        await this.connectionDeffered;
+
+        return this.connection;
     }
 }
 

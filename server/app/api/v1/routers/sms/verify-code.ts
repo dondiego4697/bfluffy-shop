@@ -14,7 +14,9 @@ interface Body {
 export const verifyCode = wrap<Request, Response>(async (req, res) => {
     const {phone, code} = req.body as Body;
 
-    const {manager} = dbManager.getConnection().getRepository(User);
+    const connection = await dbManager.getConnection();
+
+    const {manager} = connection.getRepository(User);
     const user = await manager.findOne(User, {phone: String(phone)});
 
     if (!user) {

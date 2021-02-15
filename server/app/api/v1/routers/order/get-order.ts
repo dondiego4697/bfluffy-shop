@@ -8,8 +8,9 @@ import {DbTable} from '$db-entity/tables';
 export const getOrder = wrap<Request, Response>(async (req, res) => {
     const {public_id: publicId} = req.params;
 
-    const order = await dbManager
-        .getConnection()
+    const connection = await dbManager.getConnection();
+
+    const order = await connection
         .getRepository(Order)
         .createQueryBuilder(DbTable.ORDER)
         .leftJoinAndSelect(`${DbTable.ORDER}.orderPositions`, DbTable.ORDER_POSITION)

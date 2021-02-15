@@ -12,6 +12,7 @@ INSERT INTO good_category (code, display_name) VALUES
     ('konservy', 'консервы'),
     ('naturalnaya_eda', 'натуральная еда'),
     ('suhie_korma', 'сухие корма'),
+    ('vlazhnye_korma', 'влажные корма'),
     ('holistik_korma', 'холистик корма');
     
 

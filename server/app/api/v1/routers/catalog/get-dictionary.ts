@@ -12,7 +12,7 @@ export const getDictionary = wrap<Request, Response>(async (req, res) => {
         return res.json(cache);
     }
 
-    const connection = dbManager.getConnection();
+    const connection = await dbManager.getConnection();
 
     const [brands, goodCategories, petCategories] = await Promise.all([
         connection.createQueryBuilder().select(DbTable.BRAND).from(Brand, DbTable.BRAND).getMany(),

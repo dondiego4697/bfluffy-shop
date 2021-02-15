@@ -2,8 +2,9 @@ import {dbManager} from 'app/lib/db-manager';
 
 (async () => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
+    const connection = await dbManager.getConnection();
 
-    await dbManager.getConnection().query(`
+    await connection.query(`
         DROP SCHEMA IF EXISTS public CASCADE;
         CREATE SCHEMA public;
     `);

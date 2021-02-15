@@ -16,7 +16,7 @@ export const sendCode = wrap<Request, Response>(async (req, res) => {
     const {phone} = req.body as Body;
     const code = random(1000, 9999);
 
-    const connection = dbManager.getConnection();
+    const connection = await dbManager.getConnection();
     const {manager} = connection.getRepository(User);
     const user = await manager.findOne(User, {phone: String(phone)});
 

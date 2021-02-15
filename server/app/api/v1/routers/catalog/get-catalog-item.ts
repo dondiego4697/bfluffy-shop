@@ -15,8 +15,8 @@ export const getCatalogItem = wrap<Request, Response>(async (req, res) => {
 
     const {public_id: publicId} = req.params;
 
-    const connection = dbManager.getConnection();
-    const {manager: catalogItemManager} = dbManager.getConnection().getRepository(CatalogItem);
+    const connection = await dbManager.getConnection();
+    const {manager: catalogItemManager} = connection.getRepository(CatalogItem);
 
     const catalogItem = await catalogItemManager.findOne(CatalogItem, {publicId});
 

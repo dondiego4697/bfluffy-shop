@@ -30,8 +30,9 @@ export const checkCart = wrap<Request, Response>(async (req, res) => {
 
     const ids = goods.map(({publicId}) => publicId);
 
-    const storageItems = await dbManager
-        .getConnection()
+    const connection = await dbManager.getConnection();
+
+    const storageItems = await connection
         .getRepository(Storage)
         .createQueryBuilder(DbTable.STORAGE)
         .innerJoinAndSelect(`${DbTable.STORAGE}.catalogItem`, DbTable.CATALOG_ITEM)

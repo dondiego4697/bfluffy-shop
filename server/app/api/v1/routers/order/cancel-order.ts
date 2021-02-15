@@ -11,8 +11,9 @@ import {ClientError} from '$error/error';
 export const cancelOrder = wrap<Request, Response>(async (req, res) => {
     const {public_id: publicId} = req.params;
 
-    const order = await dbManager
-        .getConnection()
+    const connection = await dbManager.getConnection();
+
+    const order = await connection
         .getRepository(Order)
         .createQueryBuilder(DbTable.ORDER)
         .leftJoinAndSelect(`${DbTable.ORDER}.orderPositions`, DbTable.ORDER_POSITION)
@@ -27,7 +28,7 @@ export const cancelOrder = wrap<Request, Response>(async (req, res) => {
         throw new ClientError('ORDER_ALREADY_FINISHED', {meta: {order}});
     }
 
-    await dbManager.getConnection().transaction(async (manager) => {
+    await connection.transaction(async (manager) => {
         await manager
             .createQueryBuilder()
             .update(Order)

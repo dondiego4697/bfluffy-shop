@@ -1,6 +1,6 @@
 import {toFinite} from 'lodash';
-import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, AfterLoad, JoinColumn} from 'typeorm';
-import {Catalog} from '$db-entity/entities';
+import {Entity, PrimaryGeneratedColumn, OneToOne, Column, ManyToOne, AfterLoad, JoinColumn} from 'typeorm';
+import {Catalog, Storage} from '$db-entity/entities';
 import {DbTable} from '$db-entity/tables';
 
 @Entity({name: DbTable.CATALOG_ITEM})
@@ -9,6 +9,7 @@ export class CatalogItem {
     _convertNumerics() {
         this.id = toFinite(this.id);
         this.catalogId = toFinite(this.catalogId);
+        this.weightKg = toFinite(this.weightKg);
     }
 
     @PrimaryGeneratedColumn()
@@ -23,6 +24,9 @@ export class CatalogItem {
     @ManyToOne(() => Catalog, (catalog) => catalog.catalogItems)
     @JoinColumn({name: 'catalog_id', referencedColumnName: 'id'})
     catalog: Catalog;
+
+    @OneToOne(() => Storage, (storage) => storage.catalogItem)
+    storage: Storage;
 
     @Column({nullable: true, name: 'weight_kg'})
     weightKg?: number;

@@ -17,9 +17,6 @@ import {requestId} from 'app/middleware/request-id';
 import {logger as loggerMiddleware} from 'app/middleware/logger';
 import {router as v1} from 'app/api/v1';
 import {ClientError} from '$error/error';
-import {createCatalog} from '$search/create-catalog';
-
-createCatalog();
 
 const bodyParserJson = bodyParser.json({
     limit: '5mb',

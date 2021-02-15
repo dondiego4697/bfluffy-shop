@@ -21,7 +21,8 @@ import {DbTable} from '$db-entity/tables';
 
 async function createBrand() {
     const name = faker.name.title() + Math.random();
-    const {manager} = dbManager.getConnection().getRepository(Brand);
+    const connection = await dbManager.getConnection();
+    const {manager} = connection.getRepository(Brand);
 
     const brand = manager.create(Brand, {
         code: slugify(name),
@@ -35,7 +36,8 @@ async function createBrand() {
 
 async function createPetCategory() {
     const name = faker.name.title() + Math.random();
-    const {manager} = dbManager.getConnection().getRepository(PetCategory);
+    const connection = await dbManager.getConnection();
+    const {manager} = connection.getRepository(PetCategory);
 
     const pet = manager.create(PetCategory, {
         code: slugify(name),
@@ -49,7 +51,8 @@ async function createPetCategory() {
 
 async function createGoodCategory() {
     const name = faker.name.title() + Math.random();
-    const {manager} = dbManager.getConnection().getRepository(GoodCategory);
+    const connection = await dbManager.getConnection();
+    const {manager} = connection.getRepository(GoodCategory);
 
     const good = manager.create(GoodCategory, {
         code: slugify(name),
@@ -68,7 +71,8 @@ interface CreateCatalogParams {
 }
 
 async function createCatalog(params: CreateCatalogParams) {
-    const {manager} = dbManager.getConnection().getRepository(Catalog);
+    const connection = await dbManager.getConnection();
+    const {manager} = connection.getRepository(Catalog);
 
     const catalog = manager.create(Catalog, {
         goodCategoryId: params.goodCategoryId,
@@ -90,7 +94,8 @@ interface CreateCatalogItemParams {
 }
 
 async function createCatalogItem(params: CreateCatalogItemParams) {
-    const {manager} = dbManager.getConnection().getRepository(CatalogItem);
+    const connection = await dbManager.getConnection();
+    const {manager} = connection.getRepository(CatalogItem);
 
     const catalogItem = manager.create(CatalogItem, {
         catalogId: params.catalogId,
@@ -109,7 +114,8 @@ interface CreateOrderParams {
 }
 
 async function createOrder(params: CreateOrderParams = {}) {
-    const {manager} = dbManager.getConnection().getRepository(Order);
+    const connection = await dbManager.getConnection();
+    const {manager} = connection.getRepository(Order);
 
     const order = manager.create(Order, {
         data: {},
@@ -131,7 +137,7 @@ interface CreateStorageParams {
 }
 
 async function createStorage(params: CreateStorageParams) {
-    const connection = dbManager.getConnection();
+    const connection = await dbManager.getConnection();
     const {manager} = connection.getRepository(Storage);
 
     const storage = manager.create(Storage, {
@@ -150,7 +156,7 @@ interface CreateOrderPositionParams {
 }
 
 async function createOrderPosition(params: CreateOrderPositionParams) {
-    const connection = dbManager.getConnection();
+    const connection = await dbManager.getConnection();
 
     const brand = await TestFactory.createBrand();
     const pet = await TestFactory.createPetCategory();
@@ -231,7 +237,7 @@ interface CreateUserParams {
 }
 
 async function createUser(params: CreateUserParams = {}) {
-    const connection = dbManager.getConnection();
+    const connection = await dbManager.getConnection();
     const {manager} = connection.getRepository(User);
 
     const user = manager.create(User, {
@@ -246,20 +252,21 @@ async function createUser(params: CreateUserParams = {}) {
 }
 
 async function getAllUsers() {
-    return dbManager.getConnection().createQueryBuilder().select(DbTable.USER).from(User, DbTable.USER).getMany();
+    const connection = await dbManager.getConnection();
+
+    return connection.createQueryBuilder().select(DbTable.USER).from(User, DbTable.USER).getMany();
 }
 
 async function getAllStorageItems() {
-    return dbManager
-        .getConnection()
-        .createQueryBuilder()
-        .select(DbTable.STORAGE)
-        .from(Storage, DbTable.STORAGE)
-        .getMany();
+    const connection = await dbManager.getConnection();
+
+    return connection.createQueryBuilder().select(DbTable.STORAGE).from(Storage, DbTable.STORAGE).getMany();
 }
 
 async function getAllOrders() {
-    return dbManager.getConnection().createQueryBuilder().select(DbTable.ORDER).from(Order, DbTable.ORDER).getMany();
+    const connection = await dbManager.getConnection();
+
+    return connection.createQueryBuilder().select(DbTable.ORDER).from(Order, DbTable.ORDER).getMany();
 }
 
 async function getCsrfToken(url: string) {

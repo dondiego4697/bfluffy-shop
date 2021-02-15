@@ -1,18 +1,18 @@
 import * as express from 'express';
+import * as Joi from '@hapi/joi';
+import {bodyValidate} from 'app/middleware/validate';
+import {base} from 'api-v1/routers/search/base';
 
-export const router = express.Router();
+const searchSchema = Joi.object({
+    limit: Joi.number().default(20),
+    offset: Joi.number().default(0),
+    petCode: Joi.string(),
+    brandCode: Joi.string(),
+    goodCode: Joi.string(),
+    cost: Joi.object({
+        min: Joi.number(),
+        max: Joi.number()
+    })
+});
 
-/**
- * Royal Canin сухой корм для собак
- * <brand> <good_type> <pet_category> <params> 
- * 
- * <params>: вес
- * 
- * --> Страница поиска на бренд
- * ----> Страница поиска на бренд + вид товара
- * ------> Страница поиска на бренд + вид товара + категория животного
- * --------> Конкретная страница товара (бренд + вид товара + категория животного + параметры)
- * 
- * Поиск по названию, а именно
- * 
- */
+export const router = express.Router().post('/base', bodyValidate(searchSchema), base).get('/fulltext');

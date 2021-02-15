@@ -9,19 +9,11 @@
       "database": "petstore",
       "synchronize": true,
       "logging": false,
-      "entities": [
-         "database/entity/**/*.ts"
-      ],
       "migrations": [
-         "database/migration/**/*.ts"
-      ],
-      "subscribers": [
-         "database/subscriber/**/*.ts"
+         "resources/database/migration/**/*.ts"
       ],
       "cli": {
-         "entitiesDir": "database/entity",
-         "migrationsDir": "database/migration",
-         "subscribersDir": "database/subscriber"
+         "migrationsDir": "resources/database/migration"
       }
    },
    {
@@ -34,19 +26,11 @@
       "database": "petstore_test",
       "synchronize": true,
       "logging": false,
-      "entities": [
-         "database/entity/**/*.ts"
-      ],
       "migrations": [
-         "database/migration/**/*.ts"
-      ],
-      "subscribers": [
-         "database/subscriber/**/*.ts"
+         "resources/database/migration/**/*.ts"
       ],
       "cli": {
-         "entitiesDir": "database/entity",
-         "migrationsDir": "database/migration",
-         "subscribersDir": "database/subscriber"
+         "migrationsDir": "resources/database/migration"
       }
    }
 ]

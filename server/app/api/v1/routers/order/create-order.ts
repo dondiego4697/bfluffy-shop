@@ -29,7 +29,9 @@ interface Body {
 export const createOrder = wrap<Request, Response>(async (req, res) => {
     const {phone, delivery, goods} = req.body as Body;
 
-    const orderPublicId = await dbManager.getConnection().transaction(async (manager) => {
+    const connection = await dbManager.getConnection();
+
+    const orderPublicId = await connection.transaction(async (manager) => {
         const {manager: orderManager} = manager.getRepository(Order);
 
         const orderRaw = orderManager.create(Order, {

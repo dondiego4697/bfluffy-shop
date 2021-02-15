@@ -51,7 +51,9 @@ export class TestContext {
             DbTable.GOOD_CATEGORY
         ];
 
-        await dbManager.getConnection().query(tables.map((table) => `TRUNCATE TABLE ${table} CASCADE;`).join('\n'));
+        const connection = await dbManager.getConnection();
+
+        await connection.query(tables.map((table) => `TRUNCATE TABLE ${table} CASCADE;`).join('\n'));
     }
 
     protected async startServer() {

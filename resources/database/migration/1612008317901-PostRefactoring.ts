@@ -78,7 +78,7 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
                 catalog_id BIGINT NOT NULL,
 
                 photo_urls JSONB NOT NULL DEFAULT '[]'::jsonb,
-                weight_kg NUMERIC(9, 2),
+                weight_kg NUMERIC(9, 3),
 
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
