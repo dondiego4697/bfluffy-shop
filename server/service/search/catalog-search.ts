@@ -23,6 +23,7 @@ interface SearchItem {
 export class CatalogSearchProvider {
     protected indexName: string = 'catalog';
     protected client: SearchClient;
+
     protected petCatagoryDict: Record<string, string> = {
         cats: 'кошек',
         kitten: 'котят',
@@ -32,8 +33,6 @@ export class CatalogSearchProvider {
 
     constructor() {
         this.client = algoliasearch(config['algolia.project'], config['algolia.token']);
-
-        this.initSearch();
     }
 
     protected static formWeight(kg: number) {
@@ -115,7 +114,7 @@ export class CatalogSearchProvider {
         return result;
     }
 
-    protected async initSearch() {
+    public async restoreCatalog() {
         const documents = await this.getSearchDocuments();
         const index = this.client.initIndex(this.indexName);
 
@@ -130,16 +129,28 @@ export class CatalogSearchProvider {
                 ranking: ['desc(exist)']
             });
         } catch (error) {
-            logger.error(error, {
-                group: 'algolia'
-            });
+            logger.error(error, {group: 'algolia'});
         }
     }
 
-    public search(query: string) {
-        return this.client.search<SearchItem>([{
+    public async search(query: string) {
+        const {results: [result]} = await this.client.search<SearchItem>([{
             indexName: this.indexName,
             query
         }]);
+
+        const data = result.hits.map((hit) => ({
+            searchMeta: hit.searchMeta,
+            highlight: [
+                `"${hit._highlightResult?.brand?.value || hit.brand}"`,
+                hit._highlightResult?.good?.value || hit.good,
+                (hit._highlightResult?.pet?.value || hit.pet).toLowerCase(),
+                hit._highlightResult?.weightKg?.value || hit.weightKg,
+            ].join(' ')
+        }));
+
+        return data;
     }
 }
+
+export const catalogSearchProvider = new CatalogSearchProvider();

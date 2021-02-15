@@ -21,6 +21,7 @@ export interface Config {
     'app.host': string;
     'algolia.token': string;
     'algolia.project': string;
+    'algolia.env': string;
     'tests.enable': boolean;
     db: DB;
 }
@@ -38,6 +39,7 @@ const production: Config = {
     'app.host': 'https://some_host.ru',
     'algolia.project': process.env.ALGOLIA_PROJECT!,
     'algolia.token': process.env.ALGOLIA_TOKEN!,
+    'algolia.env': 'production',
     db: {
         hosts: ['localhost'],
         port: 6432,
@@ -49,6 +51,7 @@ const production: Config = {
 
 const testing: Config = {
     ...production,
+    'algolia.env': 'testing',
     db: {
         ...production.db
     }
@@ -61,6 +64,7 @@ const development: Config = {
     'cors.allowedOrigins': null,
     'csrf.enable': false,
     'app.cache.enable': false,
+    'algolia.env': 'development',
     db: {
         ...testing.db,
         hosts: ['localhost', 'localhost'],
