@@ -1,3 +1,7 @@
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 import {dbManager} from 'app/lib/db-manager';
 
 (async () => {

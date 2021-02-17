@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import Boom from '@hapi/boom';
+import localtunnel from 'localtunnel';
 import assert from 'assert';
 import path from 'path';
 import bodyParser from 'body-parser';
@@ -16,7 +17,10 @@ import {cors} from 'app/middleware/cors';
 import {requestId} from 'app/middleware/request-id';
 import {logger as loggerMiddleware} from 'app/middleware/logger';
 import {router as v1} from 'app/api/v1';
+import {router as bot} from 'app/api/bot';
 import {ClientError} from '$error/error';
+import {config} from 'app/config';
+import {getTelegramProvider} from '$telegram/provider';
 
 const bodyParserJson = bodyParser.json({
     limit: '5mb',
@@ -37,28 +41,37 @@ export const app = express()
     .get('/ping', ping)
     .use(staticRouter)
     .use('/api/v1', v1)
+    .use('/bot', bot)
     .get('/*', renderHTML)
     .use((_req, _res, next) => next(Boom.notFound('endpoint not found')))
     // eslint-disable-next-line
     .use((error: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
         if (error.isBoom) {
-            sendError(res, error);
+            sendError(req, res, error);
         } else if (error instanceof ClientError) {
-            sendError(res, Boom.badRequest(error.clientErrorCode));
+            sendError(req, res, Boom.badRequest(error.clientErrorCode));
         } else {
-            req.logger.error(`unknown error: ${error.message}`);
-            sendError(res, Boom.internal());
+            sendError(req, res, Boom.internal());
         }
     });
 
-function sendError(res: express.Response, error: Boom.Boom): void {
+function sendError(req: express.Request, res: express.Response, error: Boom.Boom): void {
+    req.logger.error(`error: ${error.message}`);
     res.status(error.output.statusCode).json(error.output.payload);
 }
 
 if (!module.parent) {
-    const port = process.env.NODEJS_PORT || 8080;
-
+    const port = Number(process.env.NODEJS_PORT) || 8080;
     assert(port, 'no port provided for the application to listen to');
+    
+    const telegramProvider = getTelegramProvider();
+    telegramProvider.setWebhook();
+
+    if (config['localtunnel.enable']) {
+        localtunnel({port, subdomain: 'petstore'}).then((tunnel) => {
+            console.log(`tunnel created ${tunnel.url}`);
+        });
+    }
 
     app.listen(port, () => console.log(`application started on port ${port}`));
 }

@@ -7,7 +7,7 @@ import {wrap} from 'async-middleware';
 import {config} from 'app/config';
 import {dbManager} from 'app/lib/db-manager';
 import {OrderStatus} from 'db-entity/order';
-import {smsProvider} from '$sms/sms';
+import {SmsProvider} from '$sms/provider';
 import {Order, OrderPosition, Storage} from '$db-entity/entities';
 import {DbTable} from '$db-entity/tables';
 import {ClientError} from '$error/error';
@@ -160,9 +160,16 @@ export const createOrder = wrap<Request, Response>(async (req, res) => {
         return order.publicId;
     });
 
-    const url = new URL(`/order/${orderPublicId}`, config['app.host']);
-
-    smsProvider.sendSms(phone, `Ваш заказ успешно создан: ${url.toString()}`);
+    sendSms(phone, orderPublicId);
 
     res.json({publicId: orderPublicId});
 });
+
+async function sendSms(phone: number, orderPublicId: string) {
+    const url = new URL(`/order/${orderPublicId}`, config['app.host']);
+    const text = `Ваш заказ успешно создан: ${url.toString()}`;
+
+    const smsProvider = new SmsProvider();
+
+    await smsProvider.send(phone, text);
+}

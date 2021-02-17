@@ -14,7 +14,7 @@ if (!USE_COMPILED) {
     require('ts-node').register({
         compiler: 'ttypescript',
         files: true,
-        project: path.resolve(ROOT_DIR, './cli/tsconfig.json')
+        project: path.resolve(ROOT_DIR, './server/tsconfig.json')
     });
 }
 
@@ -34,7 +34,7 @@ global.cliRuntime = () => ({
 
 (async () => {
     try {
-        const {commands} = include('cli/commands');
+        const {commands} = include('server/@cli/commands');
         const isCommandExist = COMMAND in commands;
 
         if (!isCommandExist) {

@@ -1,4 +1,4 @@
-import algoliasearch, {SearchClient} from 'algoliasearch'
+import algoliasearch, {SearchClient} from 'algoliasearch';
 import {dbManager} from 'app/lib/db-manager';
 import {Catalog, Storage} from '$db-entity/entities';
 import {DbTable} from '$db-entity/tables';
@@ -11,17 +11,19 @@ interface SearchItem {
     pet: string;
     weightKg?: string;
     exist?: boolean;
-    searchMeta: {
-        brandCode: string;
-        goodCategoryCode: string;
-        petCategoryCode: string;
-    } | {
-        publicId: string;
-    };
+    searchMeta:
+        | {
+              brandCode: string;
+              goodCategoryCode: string;
+              petCategoryCode: string;
+          }
+        | {
+              publicId: string;
+          };
 }
 
 export class CatalogSearchProvider {
-    protected indexName: string = `catalog_${config['algolia.env']}`;
+    protected indexName = `catalog_${config['algolia.env']}`;
     protected client: SearchClient;
 
     protected petCatagoryDict: Record<string, string> = {
@@ -46,10 +48,7 @@ export class CatalogSearchProvider {
     protected async getCurrentCatalog() {
         const connection = await dbManager.getConnection();
 
-        const [
-            storageList,
-            catalogList
-        ] = await Promise.all([
+        const [storageList, catalogList] = await Promise.all([
             connection
                 .getRepository(Storage)
                 .createQueryBuilder(DbTable.STORAGE)
@@ -107,7 +106,7 @@ export class CatalogSearchProvider {
                     searchMeta: {
                         publicId
                     }
-                })
+                });
             });
         });
 
@@ -134,10 +133,14 @@ export class CatalogSearchProvider {
     }
 
     public async search(query: string) {
-        const {results: [result]} = await this.client.search<SearchItem>([{
-            indexName: this.indexName,
-            query
-        }]);
+        const {
+            results: [result]
+        } = await this.client.search<SearchItem>([
+            {
+                indexName: this.indexName,
+                query
+            }
+        ]);
 
         const data = result.hits.map((hit) => ({
             searchMeta: hit.searchMeta,
@@ -145,7 +148,7 @@ export class CatalogSearchProvider {
                 `"${hit._highlightResult?.brand?.value || hit.brand}"`,
                 hit._highlightResult?.good?.value || hit.good,
                 (hit._highlightResult?.pet?.value || hit.pet).toLowerCase(),
-                hit._highlightResult?.weightKg?.value || hit.weightKg,
+                hit._highlightResult?.weightKg?.value || hit.weightKg
             ].join(' ')
         }));
 

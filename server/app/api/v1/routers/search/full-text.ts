@@ -7,7 +7,7 @@ interface Query {
 }
 
 export const fullText = wrap<Request, Response>(async (req, res) => {
-    const query = req.query as unknown as Query;
+    const query = (req.query as unknown) as Query;
     const data = await catalogSearchProvider.search(query.text);
 
     res.json(data);

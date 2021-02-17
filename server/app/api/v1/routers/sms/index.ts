@@ -2,7 +2,7 @@ import * as express from 'express';
 import * as Joi from '@hapi/joi';
 import ratelimiter from 'express-rate-limit';
 import {bodyValidate} from 'app/middleware/validate';
-import {sendCode} from 'api-v1/routers/sms/send-code';
+import {sendCode} from 'app/api/v1/routers/sms/send-code';
 import {verifyCode} from 'app/api/v1/routers/sms/verify-code';
 
 const sendCodeSchema = Joi.object({
@@ -18,8 +18,8 @@ export const router = express
     .Router()
     .use(
         ratelimiter({
-            windowMs: 60 * 60 * 1000, // 1h
-            max: 10 // Максимум 10 запросов за 1h на IP
+            windowMs: 24 * 60 * 60 * 1000, // 1d
+            max: 10 // Максимум 10 запросов за 1d на IP
         })
     )
     .post('/send_code', bodyValidate(sendCodeSchema), sendCode)

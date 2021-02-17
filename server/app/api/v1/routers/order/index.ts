@@ -2,10 +2,10 @@ import * as express from 'express';
 import * as Joi from '@hapi/joi';
 import {csrf} from 'app/middleware/csrf';
 import {bodyValidate} from 'app/middleware/validate';
-import {createOrder} from 'api-v1/routers/order/create-order';
-import {checkCart} from 'api-v1/routers/order/check-cart';
-import {getOrder} from 'api-v1/routers/order/get-order';
-import {cancelOrder} from 'api-v1/routers/order/cancel-order';
+import {createOrder} from 'app/api/v1/routers/order/create-order';
+import {checkCart} from 'app/api/v1/routers/order/check-cart';
+import {getOrder} from 'app/api/v1/routers/order/get-order';
+import {cancelOrder} from 'app/api/v1/routers/order/cancel-order';
 
 const goodSchema = Joi.object({
     publicId: Joi.string().required(),

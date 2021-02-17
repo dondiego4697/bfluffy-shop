@@ -1,8 +1,16 @@
-import {Entity, PrimaryGeneratedColumn, Column} from 'typeorm';
+import {toFinite} from 'lodash';
+import {Entity, PrimaryGeneratedColumn, Column, AfterLoad} from 'typeorm';
 import {DbTable} from '$db-entity/tables';
 
 @Entity({name: DbTable.USER})
 export class User {
+    @AfterLoad()
+    _convertNumerics() {
+        this.id = toFinite(this.id);
+        this.telegramChatId = toFinite(this.telegramChatId);
+        this.telegramUserId = toFinite(this.telegramUserId);
+    }
+
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -17,6 +25,15 @@ export class User {
 
     @Column({name: 'is_root'})
     isRoot: boolean;
+
+    @Column({name: 'telegram_chat_id', nullable: true})
+    telegramChatId?: number;
+
+    @Column({name: 'telegram_user_id', nullable: true})
+    telegramUserId?: number;
+
+    @Column({name: 'telegram_enable'})
+    telegramEnable: boolean;
 
     @Column({name: 'created_at'})
     createdAt: Date;

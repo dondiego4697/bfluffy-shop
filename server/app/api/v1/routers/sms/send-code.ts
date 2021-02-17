@@ -3,7 +3,7 @@ import {random} from 'lodash';
 import {Request, Response} from 'express';
 import {wrap} from 'async-middleware';
 import {dbManager} from 'app/lib/db-manager';
-import {smsProvider} from '$sms/sms';
+import {SmsProvider} from '$sms/provider';
 import {User} from '$db-entity/entities';
 
 interface Body {
@@ -20,6 +20,8 @@ export const sendCode = wrap<Request, Response>(async (req, res) => {
     const {manager} = connection.getRepository(User);
     const user = await manager.findOne(User, {phone: String(phone)});
 
+    const smsProvider = new SmsProvider();
+
     if (!user) {
         await connection
             .createQueryBuilder()
@@ -34,7 +36,7 @@ export const sendCode = wrap<Request, Response>(async (req, res) => {
             ])
             .execute();
 
-        smsProvider.sendSms(phone, `Ваш код: ${code}`);
+        smsProvider.send(phone, `Ваш код: ${code}`);
 
         return res.json({left: TIMEOUT_IN_SECONDS});
     }
@@ -52,7 +54,7 @@ export const sendCode = wrap<Request, Response>(async (req, res) => {
             .where('id = :id', {id: user.id})
             .execute();
 
-        smsProvider.sendSms(phone, `Ваш код: ${code}`);
+        smsProvider.send(phone, `Ваш код: ${code}`);
 
         return res.json({left: TIMEOUT_IN_SECONDS});
     }

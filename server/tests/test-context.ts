@@ -1,3 +1,7 @@
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 import execa from 'execa';
 import path from 'path';
 import nock from 'nock';
@@ -62,6 +66,7 @@ export class TestContext {
         const server = execa('node', [path.resolve('./out/server/app/app.js')], {
             cwd: path.resolve(),
             env: {
+                ...process.env,
                 ENVIRONMENT: 'tests',
                 NODEJS_PORT: port
             }

@@ -24,14 +24,15 @@
 
         "pretty": true,
         "paths": {
-            "app/*": ["./app/*"],
-            "tests/*": ["./tests/*"],
-            "api-v1/*": ["./app/api/v1/*"],
+            "$@cli/*": ["@cli/*"],
+            "app/*": ["app/*"],
+            "tests/*": ["tests/*"],
             "$schedulers/*": ["schedulers/*"],
             "$db-entity/*": ["db-entity/*"],
             "$logger/*": ["service/logger/*"],
             "$error/*": ["service/error/*"],
             "$sms/*": ["service/sms/*"],
+            "$telegram/*": ["service/telegram/*"],
             "$search/*": ["service/search/*"]
         },
         "types": ["node", "express", "jest"],
@@ -39,6 +40,7 @@
     },
     "include": [
         "@types/**/*",
+        "@cli/**/*",
         "db-entity/**/*",
         "app/**/*",
         "tests/**/*",
