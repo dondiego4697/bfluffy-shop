@@ -7,8 +7,16 @@ const OUT_DIR = 'out';
 
 const argv = require('minimist')(process.argv.slice(2));
 
-const USE_COMPILED = !argv.c;
+let USE_COMPILED = !argv.c;
 const COMMAND = argv._[0];
+
+if ([
+    'lint',
+    'tests',
+    'server:compile'
+].includes(COMMAND)) {
+    USE_COMPILED = false;
+}
 
 if (!USE_COMPILED) {
     require('ts-node').register({

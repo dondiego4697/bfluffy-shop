@@ -17,7 +17,7 @@ const baseSchema = Joi.object({
 });
 
 const fullTextSchema = Joi.object({
-    text: Joi.string().required()
+    query: Joi.string().required()
 });
 
 export const router = express

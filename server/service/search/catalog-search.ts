@@ -1,9 +1,11 @@
-import algoliasearch, {SearchClient} from 'algoliasearch';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import pMap from 'p-map';
+import got, {Got} from 'got';
 import {dbManager} from 'app/lib/db-manager';
 import {Catalog, Storage} from '$db-entity/entities';
 import {DbTable} from '$db-entity/tables';
-import {config} from 'app/config';
 import {logger} from '$logger/logger';
+import {config} from 'app/config';
 
 interface SearchItem {
     brand: string;
@@ -23,8 +25,9 @@ interface SearchItem {
 }
 
 export class CatalogSearchProvider {
-    protected indexName = `catalog_${config['algolia.env']}`;
-    protected client: SearchClient;
+    protected logGroup = 'elastic_provider';
+    protected indexName = 'catalog';
+    protected client: Got;
 
     protected petCatagoryDict: Record<string, string> = {
         cats: 'кошек',
@@ -34,7 +37,55 @@ export class CatalogSearchProvider {
     };
 
     constructor() {
-        this.client = algoliasearch(config['algolia.project'], config['algolia.token']);
+        if (!config['search.enable']) {
+            return;
+        }
+
+        this.client = got.extend({
+            prefixUrl: 'http://localhost:9200',
+            responseType: 'json',
+            throwHttpErrors: false,
+            hooks: {
+                beforeRequest: [
+                    (options) => {
+                        logger.info('request', {
+                            group: this.logGroup,
+                            url: options.url,
+                            body: options.json,
+                            method: options.method
+                        });
+                    }
+                ],
+                beforeError: [
+                    (error) => {
+                        logger.error('error', {
+                            group: this.logGroup,
+                            url: error.request?.requestUrl,
+                            error: error.message,
+                            statusCode: error.response?.statusCode,
+                            body: error.response?.body
+                        });
+
+                        return error;
+                    }
+                ],
+                afterResponse: [
+                    (response) => {
+                        logger.info('response', {
+                            group: this.logGroup,
+                            url: response.request.requestUrl,
+                            statusCode: response.statusCode,
+                            body: response.body,
+                            method: response.method
+                        });
+
+                        return response;
+                    }
+                ]
+            }
+        });
+
+        this.restoreCatalog();
     }
 
     protected static formWeight(kg: number) {
@@ -115,45 +166,133 @@ export class CatalogSearchProvider {
 
     public async restoreCatalog() {
         const documents = await this.getSearchDocuments();
-        const index = this.client.initIndex(this.indexName);
 
-        try {
-            await index.replaceAllObjects(documents, {
-                safe: true,
-                autoGenerateObjectIDIfNotExist: true
-            });
+        await this.client.delete(this.indexName);
+        await this.client.put(this.indexName, {
+            json: {
+                settings: {
+                    max_ngram_diff: 50,
+                    analysis: {
+                        tokenizer: {
+                            edge_tokenizer: {
+                                type: 'ngram',
+                                min_gram: 2,
+                                max_gram: 50,
+                                token_chars: ['letter', 'digit', 'punctuation', 'symbol']
+                            }
+                        },
+                        analyzer: {
+                            auto_suggest_analyzer: {
+                                type: 'custom',
+                                filter: ['lowercase'],
+                                tokenizer: 'edge_tokenizer'
+                            }
+                        }
+                    }
+                },
+                mappings: {
+                    properties: {
+                        brand: {
+                            type: 'text',
+                            analyzer: 'auto_suggest_analyzer'
+                        },
+                        good: {
+                            type: 'text',
+                            analyzer: 'auto_suggest_analyzer'
+                        },
+                        pet: {
+                            type: 'text',
+                            analyzer: 'auto_suggest_analyzer'
+                        },
+                        weightKg: {
+                            type: 'text',
+                            analyzer: 'auto_suggest_analyzer'
+                        },
+                        exist: {
+                            type: 'boolean'
+                        }
+                    }
+                }
+            }
+        });
 
-            await index.setSettings({
-                searchableAttributes: ['brand', 'good', 'pet', 'weightKg'],
-                ranking: ['desc(exist)']
-            });
-        } catch (error) {
-            logger.error(error, {group: 'algolia'});
-        }
+        await pMap(
+            documents,
+            async (doc) => {
+                await this.client.post(`${this.indexName}/_doc`, {
+                    searchParams: {
+                        refresh: true
+                    },
+                    json: {
+                        brand: doc.brand,
+                        good: doc.good,
+                        pet: doc.pet,
+                        weightKg: doc.weightKg,
+                        exist: doc.exist,
+                        searchMeta: doc.searchMeta
+                    }
+                });
+            },
+            {concurrency: 10}
+        );
     }
 
     public async search(query: string) {
-        const {
-            results: [result]
-        } = await this.client.search<SearchItem>([
-            {
-                indexName: this.indexName,
-                query
+        const {body} = await this.client.post<any>(`${this.indexName}/_search`, {
+            json: {
+                size: 6,
+                sort: [
+                    {
+                        exist: 'desc'
+                    }
+                ],
+                query: {
+                    bool: {
+                        should: [
+                            {
+                                match: {
+                                    good: query
+                                }
+                            },
+                            {
+                                match: {
+                                    pet: query
+                                }
+                            },
+                            {
+                                match: {
+                                    brand: query
+                                }
+                            },
+                            {
+                                match: {
+                                    weightKg: query
+                                }
+                            }
+                        ]
+                    }
+                },
+                highlight: {
+                    fields: {
+                        weightKg: {},
+                        good: {},
+                        brand: {},
+                        pet: {}
+                    }
+                }
             }
-        ]);
+        });
 
-        const data = result.hits.map((hit) => ({
-            searchMeta: hit.searchMeta,
+        const data = body.hits.hits.map((hit: any) => ({
+            searchMeta: hit._source.searchMeta,
             highlight: [
-                `"${hit._highlightResult?.brand?.value || hit.brand}"`,
-                hit._highlightResult?.good?.value || hit.good,
-                (hit._highlightResult?.pet?.value || hit.pet).toLowerCase(),
-                hit._highlightResult?.weightKg?.value || hit.weightKg
+                `'${(hit.highlight?.brand && hit.highlight?.brand[0]) || hit._source.brand}'`,
+                (hit.highlight?.good && hit.highlight?.good[0]) || hit._source.good,
+                ((hit.highlight?.pet && hit.highlight?.pet[0]) || hit._source.pet).toLowerCase(),
+                (hit.highlight?.weightKg && hit.highlight?.weightKg[0]) || hit._source.weightKg
             ].join(' ')
         }));
 
         return data;
     }
 }
-
-export const catalogSearchProvider = new CatalogSearchProvider();

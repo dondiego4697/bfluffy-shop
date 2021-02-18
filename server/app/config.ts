@@ -19,10 +19,6 @@ export interface Config {
     'header.requestId': string;
     'app.cache.enable': boolean;
     'app.host': string;
-    'algolia.enable': boolean;
-    'algolia.token': string;
-    'algolia.project': string;
-    'algolia.env': string;
     'sms-boom.enable': boolean;
     'sms-boom.host': string;
     'sms-boom.token': string;
@@ -32,6 +28,7 @@ export interface Config {
     'telegram.bot.name': string;
     'telegram.bot.token': string;
     'localtunnel.enable': boolean;
+    'search.enable': boolean;
     db: DB;
 }
 
@@ -46,14 +43,11 @@ const production: Config = {
     'csrf.token.ttl': 60 * 60 * 1000, // 1h
     'app.cache.enable': true,
     'app.host': 'https://some_host.ru',
-    'algolia.enable': true,
-    'algolia.project': 'AWRNSU2QBX',
-    'algolia.token': process.env.ALGOLIA_TOKEN!,
-    'algolia.env': 'production',
     'sms-boom.host': 'http://api.sms-boom.ru',
     'sms-boom.token': process.env.SMS_BOOM_TOKEN!,
     'sms-boom.sender': 'SOME_SENDER',
     'sms-boom.enable': true,
+    'search.enable': true,
     'telegram.host': 'https://api.telegram.org',
     'telegram.bot.enable': true,
     'telegram.bot.name': 'TODO',
@@ -69,7 +63,6 @@ const production: Config = {
 
 const testing: Config = {
     ...production,
-    'algolia.env': 'testing',
     db: {
         ...production.db
     }
@@ -85,7 +78,6 @@ const development: Config = {
     'app.host': 'https://petstore.loca.lt',
     'app.cache.enable': false,
     'sms-boom.enable': false,
-    'algolia.env': 'development',
     'telegram.bot.name': 'PetStoreDevelopmentBot',
     db: {
         ...testing.db,
@@ -101,10 +93,10 @@ const tests: Config = {
     ...development,
     'logger.db.level': ['error'],
     'localtunnel.enable': false,
-    'algolia.enable': false,
     'sms-boom.enable': true,
     'csrf.enable': true,
     'app.cache.enable': false,
+    'search.enable': false,
     'telegram.bot.enable': false,
     db: {
         ...development.db,
@@ -126,6 +118,5 @@ export const config = configForEnv!;
 
 assert(config, `there is no configuration for environment "${env}"`);
 
-assert(config['algolia.token'], 'there is no algolia token');
 assert(config['sms-boom.host'], 'there is no algolia token');
 assert(config['telegram.bot.token'], 'there is no algolia token');

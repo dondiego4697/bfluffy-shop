@@ -1,14 +1,17 @@
 import {Request, Response} from 'express';
 import {wrap} from 'async-middleware';
-import {catalogSearchProvider} from '$search/catalog-search';
+import {CatalogSearchProvider} from '$search/catalog-search';
+import '$search/catalog-search';
 
 interface Query {
-    text: string;
+    query: string;
 }
+
+const catalogSearchProvider = new CatalogSearchProvider();
 
 export const fullText = wrap<Request, Response>(async (req, res) => {
     const query = (req.query as unknown) as Query;
-    const data = await catalogSearchProvider.search(query.text);
+    const data = await catalogSearchProvider.search(query.query);
 
     res.json(data);
 });

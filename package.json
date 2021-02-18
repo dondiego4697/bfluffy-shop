@@ -41,7 +41,6 @@
    "dependencies": {
       "@hapi/boom": "9.1.1",
       "@hapi/joi": "17.1.1",
-      "algoliasearch": "4.8.5",
       "async-middleware": "1.2.1",
       "cookie-parser": "1.4.5",
       "csrf": "3.1.0",
