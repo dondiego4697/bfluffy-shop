@@ -8,7 +8,7 @@ import {config} from 'app/config';
 import {dbManager} from 'app/lib/db-manager';
 import {OrderStatus} from 'db-entity/order';
 import {SmsProvider} from '$sms/provider';
-import {Order, OrderPosition, Storage} from '$db-entity/entities';
+import {Order, OrderPosition, Storage, User} from '$db-entity/entities';
 import {DbTable} from '$db-entity/tables';
 import {ClientError} from '$error/error';
 
@@ -32,10 +32,19 @@ export const createOrder = wrap<Request, Response>(async (req, res) => {
     const connection = await dbManager.getConnection();
 
     const orderPublicId = await connection.transaction(async (manager) => {
+        const {manager: userManager} = manager.getRepository(User);
+
+        const user = await userManager.findOne(User, {phone: String(phone)});
+
+        if (!user) {
+            throw new ClientError('USER_DOES_NOT_EXIST', {meta: {goods, delivery, phone}});
+        }
+
         const {manager: orderManager} = manager.getRepository(Order);
 
         const orderRaw = orderManager.create(Order, {
             data: {}, // TODO sdek
+            userId: user.id,
             clientPhone: String(phone),
             deliveryAddress: delivery.address,
             deliveryComment: delivery.comment,

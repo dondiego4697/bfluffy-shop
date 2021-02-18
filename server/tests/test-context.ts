@@ -1,17 +1,14 @@
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-import execa from 'execa';
-import path from 'path';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import http from 'http';
+import net from 'net';
 import nock from 'nock';
-import getPort from 'get-port';
 
+import {app} from 'app/app';
 import {dbManager} from 'app/lib/db-manager';
 import {DbTable} from '$db-entity/tables';
 
 export class TestContext {
-    protected server?: execa.ExecaChildProcess;
+    protected server?: http.Server;
     protected url?: string;
 
     public async getServerAddress() {
@@ -30,7 +27,7 @@ export class TestContext {
     }
 
     public async afterAll() {
-        this.stopServer();
+        await this.stopServer();
         nock.enableNetConnect();
     }
 
@@ -61,32 +58,35 @@ export class TestContext {
     }
 
     protected async startServer() {
-        const port = String(await getPort());
+        const server = http.createServer(app);
 
-        const server = execa('node', [path.resolve('./out/server/app/app.js')], {
-            cwd: path.resolve(),
-            env: {
-                ...process.env,
-                ENVIRONMENT: 'tests',
-                NODEJS_PORT: port
-            }
-        });
+        await new Promise((resolve) => server.listen(resolve));
+
+        const port = (server.address() as net.AddressInfo).port;
 
         this.server = server;
         this.url = `http://localhost:${port}`;
-
-        await new Promise((resolve) => setTimeout(resolve, 1500));
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return this.url!;
     }
 
-    protected stopServer() {
+    protected async stopServer() {
         if (!this.server) {
             return;
         }
 
-        this.server.kill('SIGTERM');
+        await new Promise<void>((resolve, reject) => {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            this.server!.close((error: any) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
+        });
+
         this.server = undefined;
     }
 }

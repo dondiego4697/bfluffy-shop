@@ -8,6 +8,8 @@ export class PostRefactoring1612459505133 implements MigrationInterface {
                 id BIGSERIAL NOT NULL,
                 public_id UUID NOT NULL DEFAULT uuid_generate_v1(),
 
+                user_id BIGINT NOT NULL,
+
                 data JSONB NOT NULL DEFAULT '{}'::jsonb,
                 
                 client_phone TEXT NOT NULL,
@@ -21,10 +23,12 @@ export class PostRefactoring1612459505133 implements MigrationInterface {
                 
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
 
-                CONSTRAINT pk_orders PRIMARY KEY (id)
+                CONSTRAINT pk_orders PRIMARY KEY (id),
+                CONSTRAINT fk_orders_user_id_users FOREIGN KEY(user_id) REFERENCES users (id)
             );
 
-            CREATE INDEX orders_public_id_idx ON orders (public_id);
+            CREATE INDEX orders_public_id_idx ON orders USING btree (public_id);
+            CREATE INDEX orders_client_phone_idx ON orders USING btree (client_phone);
 
             CREATE TABLE order_position (
                 id BIGSERIAL NOT NULL,
@@ -47,6 +51,7 @@ export class PostRefactoring1612459505133 implements MigrationInterface {
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
             DROP INDEX orders_public_id_idx;
+            DROP INDEX orders_client_phone_idx;
 
             DROP TABLE order_position;
             DROP TABLE orders;

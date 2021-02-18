@@ -1,6 +1,6 @@
 import {toFinite} from 'lodash';
-import {Entity, PrimaryGeneratedColumn, Column, OneToMany, AfterLoad} from 'typeorm';
-import {OrderPosition} from '$db-entity/entities';
+import {Entity, PrimaryGeneratedColumn, Column, OneToMany, AfterLoad, ManyToOne, JoinColumn} from 'typeorm';
+import {OrderPosition, User} from '$db-entity/entities';
 import {DbTable} from '$db-entity/tables';
 
 interface Data {
@@ -24,6 +24,7 @@ export class Order {
     @AfterLoad()
     _convertNumerics() {
         this.id = toFinite(this.id);
+        this.userId = toFinite(this.userId);
     }
 
     @PrimaryGeneratedColumn()
@@ -31,6 +32,13 @@ export class Order {
 
     @OneToMany(() => OrderPosition, (position) => position.order)
     orderPositions: OrderPosition[];
+
+    @ManyToOne(() => User, (user) => user.orders)
+    @JoinColumn({name: 'user_id', referencedColumnName: 'id'})
+    user: User;
+
+    @Column({name: 'user_id'})
+    userId: number;
 
     @Column({name: 'public_id'})
     publicId: string;

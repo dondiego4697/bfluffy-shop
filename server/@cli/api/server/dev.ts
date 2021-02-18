@@ -15,10 +15,11 @@ export async function handle() {
                 `--project ${path.resolve(ROOT_DIR, './server/tsconfig.json')}`,
                 path.resolve(ROOT_DIR, './server/app/app.ts')
             ].join(' '),
-            '-w', path.resolve(ROOT_DIR, './server'),
-            '-e', 'ts,json'
+            '-w',
+            path.resolve(ROOT_DIR, './server'),
+            '-e',
+            'ts,json'
         ],
         {stdout: 'inherit', stderr: 'inherit', cwd: ROOT_DIR}
     );
 }
-        

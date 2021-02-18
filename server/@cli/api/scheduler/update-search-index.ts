@@ -3,7 +3,6 @@ export async function handle() {
     const {name} = argv;
 
     if (!name) {
-        throw new Error(`"--name" is required`);
+        throw new Error('"--name" is required');
     }
 }
-        

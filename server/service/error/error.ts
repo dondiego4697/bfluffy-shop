@@ -9,7 +9,11 @@ interface Params {
     meta?: Record<string, any>;
 }
 
-type ClientErrorCode = 'COST_OR_QUANTITY_CHANGED' | 'ORDER_ALREADY_FINISHED' | 'SMS_SEND_FAILED';
+type ClientErrorCode =
+    | 'COST_OR_QUANTITY_CHANGED'
+    | 'ORDER_ALREADY_FINISHED'
+    | 'SMS_SEND_FAILED'
+    | 'USER_DOES_NOT_EXIST';
 
 export class LoggableError extends Error {
     constructor(params: Params) {

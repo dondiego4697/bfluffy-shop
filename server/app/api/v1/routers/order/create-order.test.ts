@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import got from 'got';
+import nock from 'nock';
 import {v4 as uuidv4} from 'uuid';
 import moment from 'moment';
 
 import {TestContext} from 'tests/test-context';
 import {TestFactory} from 'tests/test-factory';
+import {User} from '$db-entity/user';
+import {config} from 'app/config';
 
 const PATH = '/api/v1/order/create';
 
@@ -34,6 +37,7 @@ async function createBase() {
 describe(`POST ${PATH}`, () => {
     const context = new TestContext();
     let url: string;
+    let user: User;
     let csrf: string;
 
     beforeAll(async () => {
@@ -48,6 +52,7 @@ describe(`POST ${PATH}`, () => {
     beforeEach(async () => {
         await context.beforeEach();
         csrf = await TestFactory.getCsrfToken(url);
+        user = await TestFactory.createUser();
     });
 
     it('should create order', async () => {
@@ -58,12 +63,20 @@ describe(`POST ${PATH}`, () => {
 
         const deliveryDate = moment().add(1, 'days');
 
+        nock(config['sms-boom.host'])
+            .get('/messages/v2/send')
+            .query(
+                (q: any) =>
+                    q.phone === user.phone && q.text.includes(`Ваш заказ успешно создан: ${config['app.host']}/order/`)
+            )
+            .reply(200);
+
         const {statusCode, body} = await got.post<any>(`${url}${PATH}`, {
             responseType: 'json',
             throwHttpErrors: false,
             json: {
                 csrf,
-                phone: 7988112312,
+                phone: user.phone,
                 delivery: {
                     address: 'address',
                     date: deliveryDate.format('X')
@@ -84,7 +97,7 @@ describe(`POST ${PATH}`, () => {
         const order = orders.find((item) => item.publicId === body.publicId);
 
         expect(order).toMatchObject({
-            clientPhone: '7988112312',
+            clientPhone: user.phone,
             deliveryAddress: 'address',
             deliveryDate: deliveryDate.milliseconds(0).toDate(),
             status: 'CREATED'
@@ -108,7 +121,7 @@ describe(`POST ${PATH}`, () => {
             throwHttpErrors: false,
             json: {
                 csrf,
-                phone: 7988112312,
+                phone: user.phone,
                 delivery: {
                     address: 'address',
                     date: moment().format('X')
@@ -127,6 +140,31 @@ describe(`POST ${PATH}`, () => {
         expect(body.message).toEqual('COST_OR_QUANTITY_CHANGED');
     });
 
+    it('should return client error if user does not exist', async () => {
+        const {statusCode, body} = await got.post<any>(`${url}${PATH}`, {
+            responseType: 'json',
+            throwHttpErrors: false,
+            json: {
+                csrf,
+                phone: 7988112312,
+                delivery: {
+                    address: 'address',
+                    date: moment().format('X')
+                },
+                goods: [
+                    {
+                        publicId: uuidv4(),
+                        quantity: 1,
+                        cost: 99.99
+                    }
+                ]
+            }
+        });
+
+        expect(statusCode).toBe(400);
+        expect(body.message).toEqual('USER_DOES_NOT_EXIST');
+    });
+
     it('should return client error if cost changed', async () => {
         const {
             storageItems: [storageItem],
@@ -138,7 +176,7 @@ describe(`POST ${PATH}`, () => {
             throwHttpErrors: false,
             json: {
                 csrf,
-                phone: 7988112312,
+                phone: user.phone,
                 delivery: {
                     address: 'address',
                     date: moment().format('X')
@@ -168,7 +206,7 @@ describe(`POST ${PATH}`, () => {
             throwHttpErrors: false,
             json: {
                 csrf,
-                phone: 7988112312,
+                phone: user.phone,
                 delivery: {
                     address: 'address',
                     date: moment().format('X')

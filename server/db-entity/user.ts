@@ -1,6 +1,7 @@
 import {toFinite} from 'lodash';
-import {Entity, PrimaryGeneratedColumn, Column, AfterLoad} from 'typeorm';
+import {Entity, PrimaryGeneratedColumn, OneToMany, Column, AfterLoad} from 'typeorm';
 import {DbTable} from '$db-entity/tables';
+import {Order} from './entities';
 
 @Entity({name: DbTable.USER})
 export class User {
@@ -10,6 +11,9 @@ export class User {
         this.telegramChatId = toFinite(this.telegramChatId);
         this.telegramUserId = toFinite(this.telegramUserId);
     }
+
+    @OneToMany(() => Order, (order) => order.user)
+    orders: Order[];
 
     @PrimaryGeneratedColumn()
     id: number;

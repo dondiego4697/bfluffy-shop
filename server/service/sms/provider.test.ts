@@ -12,7 +12,6 @@ describe('sms provider', () => {
     afterAll(async () => context.afterAll());
     beforeEach(async () => context.beforeEach());
 
-    
     it('should throw client error if smth was wrong', async () => {
         nock(config['sms-boom.host'])
             .get('/messages/v2/send')
@@ -26,7 +25,7 @@ describe('sms provider', () => {
         let checkError;
 
         try {
-            await smsProvider.send(123, 'text')
+            await smsProvider.send(123, 'text');
         } catch (error) {
             checkError = error;
         }

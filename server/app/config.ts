@@ -28,15 +28,14 @@ export interface Config {
     'sms-boom.token': string;
     'sms-boom.sender': string;
     'telegram.host': string;
+    'telegram.bot.enable': boolean;
     'telegram.bot.name': string;
     'telegram.bot.token': string;
-    'tests.enable': boolean;
     'localtunnel.enable': boolean;
     db: DB;
 }
 
 const production: Config = {
-    'tests.enable': false,
     'logger.colorize': false,
     'localtunnel.enable': false,
     'logger.db.level': 'all',
@@ -56,6 +55,7 @@ const production: Config = {
     'sms-boom.sender': 'SOME_SENDER',
     'sms-boom.enable': true,
     'telegram.host': 'https://api.telegram.org',
+    'telegram.bot.enable': true,
     'telegram.bot.name': 'TODO',
     'telegram.bot.token': process.env.TELEGRAM_BOT_TOKEN!,
     db: {
@@ -103,9 +103,9 @@ const tests: Config = {
     'localtunnel.enable': false,
     'algolia.enable': false,
     'sms-boom.enable': true,
-    'tests.enable': true,
     'csrf.enable': true,
     'app.cache.enable': false,
+    'telegram.bot.enable': false,
     db: {
         ...development.db,
         database: 'petstore_test'

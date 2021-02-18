@@ -51,7 +51,7 @@ export const app = express()
         } else if (error instanceof ClientError) {
             sendError(req, res, Boom.badRequest(error.clientErrorCode));
         } else {
-            sendError(req, res, Boom.internal());
+            sendError(req, res, Boom.boomify(error));
         }
     });
 
@@ -62,9 +62,11 @@ function sendError(req: express.Request, res: express.Response, error: Boom.Boom
 
 if (!module.parent) {
     const port = Number(process.env.NODEJS_PORT) || 8080;
+
     assert(port, 'no port provided for the application to listen to');
-    
+
     const telegramProvider = getTelegramProvider();
+
     telegramProvider.setWebhook();
 
     if (config['localtunnel.enable']) {

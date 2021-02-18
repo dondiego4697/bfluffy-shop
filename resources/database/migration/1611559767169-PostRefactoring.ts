@@ -15,17 +15,24 @@ export class PostRefactoring1611559767169 implements MigrationInterface {
 
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
 
+                telegram_chat_id BIGINT,
+                telegram_user_id BIGINT,
+                telegram_enable BOOLEAN NOT NULL DEFAULT FALSE,
+
                 CONSTRAINT pk_users PRIMARY KEY (id),
                 CONSTRAINT uq_users_phone UNIQUE (phone)
             );
 
-            CREATE INDEX users_phone_idx ON users (phone);
+            CREATE INDEX users_phone_idx ON users USING btree (phone);
         `);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
             DROP INDEX users_phone_idx;
+
+            DROP INDEX users_telegram_chat_id_idx;
+            DROP INDEX users_telegram_user_id_idx;
 
             DROP TABLE "users";
         `);

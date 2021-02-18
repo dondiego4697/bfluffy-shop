@@ -88,7 +88,7 @@ export class PostRefactoring1612008317901 implements MigrationInterface {
                 CONSTRAINT fk_catalog_item_catalog_id_catalog FOREIGN KEY(catalog_id) REFERENCES catalog (id)
             );
 
-            CREATE INDEX catalog_item_public_id_idx ON catalog_item (public_id);
+            CREATE INDEX catalog_item_public_id_idx ON catalog_item USING btree (public_id);
 
             CREATE TRIGGER
                 update_catalog_item_updated_at_trigger

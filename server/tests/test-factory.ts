@@ -111,14 +111,17 @@ async function createCatalogItem(params: CreateCatalogItemParams) {
 interface CreateOrderParams {
     status?: OrderStatus;
     resolution?: OrderResolution;
+    userId?: number;
 }
 
 async function createOrder(params: CreateOrderParams = {}) {
+    const user = await TestFactory.createUser();
     const connection = await dbManager.getConnection();
     const {manager} = connection.getRepository(Order);
 
     const order = manager.create(Order, {
         data: {},
+        userId: params.userId || user.id,
         clientPhone: faker.phone.phoneNumber(),
         deliveryAddress: faker.address.streetAddress(),
         deliveryComment: faker.lorem.text(),
@@ -234,6 +237,8 @@ async function createOrderPosition(params: CreateOrderPositionParams) {
 
 interface CreateUserParams {
     lastSmsCodeAt?: Date;
+    telegramUserId?: number;
+    telegramEnable?: boolean;
 }
 
 async function createUser(params: CreateUserParams = {}) {
@@ -243,7 +248,9 @@ async function createUser(params: CreateUserParams = {}) {
     const user = manager.create(User, {
         phone: String(faker.random.number()),
         lastSmsCode: faker.random.number(),
-        lastSmsCodeAt: params.lastSmsCodeAt
+        lastSmsCodeAt: params.lastSmsCodeAt,
+        telegramUserId: params.telegramUserId,
+        telegramEnable: params.telegramEnable
     });
 
     await manager.save(user);

@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import got from 'got';
+import nock from 'nock';
 import moment from 'moment';
 
 import {TestContext} from 'tests/test-context';
 import {TestFactory} from 'tests/test-factory';
+import {config} from 'app/config';
 
 const PATH = '/api/v1/sms/send_code';
 
@@ -21,11 +23,16 @@ describe(`POST ${PATH}`, () => {
     });
 
     it('should create user if it does not exist', async () => {
+        const checkPhone = '79881231222';
+
+        nock(config['sms-boom.host'])
+            .get('/messages/v2/send')
+            .query((q: any) => q.phone === checkPhone && q.text.includes('Ваш код:'))
+            .reply(200);
+
         const usersBefore = await TestFactory.getAllUsers();
 
         expect(usersBefore.length).toBe(0);
-
-        const checkPhone = '79881231222';
 
         const {statusCode, body} = await got.post<any>(`${url}${PATH}`, {
             responseType: 'json',
@@ -48,6 +55,11 @@ describe(`POST ${PATH}`, () => {
         const userBefore = await TestFactory.createUser({
             lastSmsCodeAt: moment().subtract(2, 'minutes').toDate()
         });
+
+        nock(config['sms-boom.host'])
+            .get('/messages/v2/send')
+            .query((q: any) => q.phone === userBefore.phone && q.text.includes('Ваш код:'))
+            .reply(200);
 
         const {statusCode, body} = await got.post<any>(`${url}${PATH}`, {
             responseType: 'json',

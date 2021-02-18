@@ -39,6 +39,7 @@ export class TelegramProvider {
                             url: TelegramProvider.hideToken(error.request?.requestUrl),
                             headers: error.response?.headers
                         });
+
                         return error;
                     }
                 ],
@@ -52,6 +53,7 @@ export class TelegramProvider {
                             body: response.body,
                             method: response.method
                         });
+
                         return response;
                     }
                 ]
@@ -63,16 +65,20 @@ export class TelegramProvider {
         if (!url) {
             return;
         }
-    
+
         return decodeURIComponent(decodeURI(url)).split(config['telegram.bot.token']).join('<token>');
     }
 
     public async setWebhook() {
+        if (!config['telegram.bot.enable']) {
+            return;
+        }
+
         await this.client.get('setWebhook', {
             searchParams: {
                 url: `${config['app.host']}/bot/telegram/${config['telegram.bot.token']}`
             }
-        })
+        });
     }
 
     public async sendMessage(
@@ -104,5 +110,6 @@ export function getTelegramProvider() {
     }
 
     telegramProvider = new TelegramProvider();
+
     return telegramProvider;
 }
