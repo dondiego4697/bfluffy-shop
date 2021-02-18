@@ -42,7 +42,7 @@ export class CatalogSearchProvider {
         }
 
         this.client = got.extend({
-            prefixUrl: 'http://localhost:9200',
+            prefixUrl: config['search.host'],
             responseType: 'json',
             throwHttpErrors: false,
             hooks: {

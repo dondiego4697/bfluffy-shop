@@ -28,6 +28,7 @@ export interface Config {
     'telegram.bot.name': string;
     'telegram.bot.token': string;
     'localtunnel.enable': boolean;
+    'search.host': string;
     'search.enable': boolean;
     db: DB;
 }
@@ -47,6 +48,7 @@ const production: Config = {
     'sms-boom.token': process.env.SMS_BOOM_TOKEN!,
     'sms-boom.sender': 'SOME_SENDER',
     'sms-boom.enable': true,
+    'search.host': 'http://localhost:9200',
     'search.enable': true,
     'telegram.host': 'https://api.telegram.org',
     'telegram.bot.enable': true,
