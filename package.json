@@ -4,6 +4,7 @@
    "scripts": {},
    "devDependencies": {
       "@types/cookie-parser": "1.4.2",
+      "@types/cron": "1.7.2",
       "@types/express": "4.17.11",
       "@types/express-rate-limit": "5.1.1",
       "@types/faker": "5.1.6",
@@ -43,6 +44,7 @@
       "@hapi/joi": "17.1.1",
       "async-middleware": "1.2.1",
       "cookie-parser": "1.4.5",
+      "cron": "1.8.2",
       "csrf": "3.1.0",
       "dotenv": "8.2.0",
       "express": "4.17.1",

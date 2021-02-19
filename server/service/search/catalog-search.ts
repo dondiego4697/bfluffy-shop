@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import pMap from 'p-map';
+import {CronJob} from 'cron';
 import got, {Got} from 'got';
 import {dbManager} from 'app/lib/db-manager';
 import {Catalog, Storage} from '$db-entity/entities';
@@ -28,6 +29,7 @@ export class CatalogSearchProvider {
     protected logGroup = 'elastic_provider';
     protected indexName = 'catalog';
     protected client: Got;
+    protected cronJob: CronJob;
 
     protected petCatagoryDict: Record<string, string> = {
         cats: 'кошек',
@@ -85,7 +87,11 @@ export class CatalogSearchProvider {
             }
         });
 
-        this.restoreCatalog();
+        this.cronJob = new CronJob({
+            cronTime: '*/50 * * * *',
+            onTick: () => this.restoreCatalog(),
+            runOnInit: true
+        });
     }
 
     protected static formWeight(kg: number) {
