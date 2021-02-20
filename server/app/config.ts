@@ -82,7 +82,6 @@ const development: Config = {
     'sms-boom.enable': false,
     'telegram.bot.name': 'PetStoreDevelopmentBot',
     db: {
-        ...testing.db,
         hosts: ['localhost', 'localhost'],
         port: 6432,
         username: 'postgres',
@@ -106,11 +105,30 @@ const tests: Config = {
     }
 };
 
+const stress: Config = {
+    ...development,
+    'logger.db.level': 'all',
+    'search.enable': true,
+    'localtunnel.enable': false,
+    'sms-boom.enable': false,
+    'csrf.enable': false,
+    'app.cache.enable': false,
+    'telegram.bot.enable': false,
+    db: {
+        hosts: ['localhost', 'localhost'],
+        port: 5432,
+        username: 'postgres',
+        password: 'password',
+        database: 'petstore'
+    }
+};
+
 const configs = new Map<string, Readonly<Config>>([
     ['production', production],
     ['testing', testing],
     ['development', development],
-    ['tests', tests]
+    ['tests', tests],
+    ['stress', stress]
 ]);
 
 const env = process.env.ENVIRONMENT || 'development';
@@ -120,5 +138,5 @@ export const config = configForEnv!;
 
 assert(config, `there is no configuration for environment "${env}"`);
 
-assert(config['sms-boom.host'], 'there is no algolia token');
-assert(config['telegram.bot.token'], 'there is no algolia token');
+assert(config['sms-boom.host'], 'there is no sms-boom token');
+assert(config['telegram.bot.token'], 'there is no telegram token');

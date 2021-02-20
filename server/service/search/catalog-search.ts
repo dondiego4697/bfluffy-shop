@@ -39,10 +39,6 @@ export class CatalogSearchProvider {
     };
 
     constructor() {
-        if (!config['search.enable']) {
-            return;
-        }
-
         this.client = got.extend({
             prefixUrl: config['search.host'],
             responseType: 'json',
@@ -86,6 +82,10 @@ export class CatalogSearchProvider {
                 ]
             }
         });
+
+        if (!config['search.enable']) {
+            return;
+        }
 
         this.cronJob = new CronJob({
             cronTime: '*/50 * * * *',

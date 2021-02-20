@@ -1,0 +1,10 @@
+**
+!.config
+!cli.js
+!package-lock.json
+!package.json
+!tsconfig.json
+!.npmrc
+!server
+!resources
+!ormconfig.json

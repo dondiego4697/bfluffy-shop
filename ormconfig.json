@@ -32,5 +32,22 @@
       "cli": {
          "migrationsDir": "resources/database/migration"
       }
+   },
+   {
+      "name": "stress",
+      "type": "postgres",
+      "host": "localhost",
+      "port": 5432,
+      "username": "postgres",
+      "password": "password",
+      "database": "petstore",
+      "synchronize": true,
+      "logging": false,
+      "migrations": [
+         "resources/database/migration/**/*.ts"
+      ],
+      "cli": {
+         "migrationsDir": "resources/database/migration"
+      }
    }
 ]
