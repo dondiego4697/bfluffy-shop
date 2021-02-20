@@ -107,7 +107,7 @@ const tests: Config = {
 
 const stress: Config = {
     ...development,
-    'logger.db.level': 'all',
+    'logger.db.level': ['error'],
     'search.enable': true,
     'localtunnel.enable': false,
     'sms-boom.enable': false,

@@ -158,6 +158,85 @@ interface CreateOrderPositionParams {
     orderId: number;
 }
 
+interface CreateOrderPositionOneParams {
+    orderId: number;
+    brandId: number;
+    goodId: number;
+    petId: number;
+    catalogId: number;
+    catalogItemId: number;
+    storageId: number;
+}
+
+async function createOrderPositionOne(params: CreateOrderPositionOneParams) {
+    const connection = await dbManager.getConnection();
+
+    const {manager: orderPositionManager} = connection.getRepository(OrderPosition);
+    const {manager: storageManager} = connection.getRepository(Storage);
+    const {manager: goodManager} = connection.getRepository(GoodCategory);
+    const {manager: petManager} = connection.getRepository(PetCategory);
+    const {manager: brandManager} = connection.getRepository(Brand);
+    const {manager: catalogManager} = connection.getRepository(Catalog);
+    const {manager: catalogItemManager} = connection.getRepository(CatalogItem);
+
+    const [storageItem, brand, pet, good, catalog, catalogItem] = await Promise.all([
+        storageManager.findOneOrFail(Storage, params.storageId),
+        brandManager.findOneOrFail(Brand, params.brandId),
+        petManager.findOneOrFail(PetCategory, params.petId),
+        goodManager.findOneOrFail(GoodCategory, params.goodId),
+        catalogManager.findOneOrFail(Catalog, params.catalogId),
+        catalogItemManager.findOneOrFail(CatalogItem, params.catalogItemId)
+    ]);
+
+    const orderPosition = orderPositionManager.create(OrderPosition, {
+        orderId: params.orderId,
+        cost: faker.random.float(),
+        quantity: faker.random.number(),
+        data: {
+            storage: {
+                id: storageItem.id,
+                cost: storageItem.cost,
+                quantity: storageItem.quantity,
+                createdAt: storageItem.createdAt.toISOString(),
+                updatedAt: storageItem.updatedAt.toISOString()
+            },
+            catalog: {
+                id: catalog.id,
+                displayName: catalog.displayName,
+                description: catalog.description,
+                rating: catalog.rating,
+                manufacturerCountry: catalog.manufacturerCountry,
+                brand: {
+                    code: brand.code,
+                    name: brand.displayName
+                },
+                pet: {
+                    code: pet.code,
+                    name: pet.displayName
+                },
+                good: {
+                    code: good.code,
+                    name: good.displayName
+                },
+                createdAt: catalog.createdAt.toISOString(),
+                updatedAt: catalog.updatedAt.toISOString()
+            },
+            catalogItem: {
+                id: catalogItem.id,
+                publicId: catalogItem.publicId,
+                photoUrls: catalogItem.photoUrls,
+                weightKg: catalogItem.weightKg,
+                createdAt: catalogItem.createdAt.toISOString(),
+                updatedAt: catalogItem.updatedAt.toISOString()
+            }
+        }
+    });
+
+    await orderPositionManager.save(orderPosition);
+
+    return orderPositionManager.findOneOrFail(OrderPosition, orderPosition.id);
+}
+
 async function createOrderPosition(params: CreateOrderPositionParams) {
     const connection = await dbManager.getConnection();
 
@@ -246,7 +325,7 @@ async function createUser(params: CreateUserParams = {}) {
     const {manager} = connection.getRepository(User);
 
     const user = manager.create(User, {
-        phone: String(faker.random.number()),
+        phone: [faker.random.number(), faker.random.number(), faker.random.number()].join(''),
         lastSmsCode: faker.random.number(),
         lastSmsCodeAt: params.lastSmsCodeAt,
         telegramUserId: params.telegramUserId,
@@ -302,6 +381,7 @@ export const TestFactory = {
     createCatalogItem,
     createOrder,
     createOrderPosition,
+    createOrderPositionOne,
     createStorage,
     createUser,
     getAllStorageItems,
