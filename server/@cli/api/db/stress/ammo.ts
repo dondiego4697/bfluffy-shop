@@ -45,41 +45,19 @@ const ALPHABET = [
     'я'
 ];
 
-const BASE_REQUESTS: string[] = [
-    'Host: some-host.ru',
-    'Accept: */*',
-    'Content-Type: application/json',
-    'Connection: Close'
-];
-
-function makeRequest(path: string, method: 'get' | 'delete', isFirst: boolean) {
-    const ammo = Buffer.from(
-        [`${method.toUpperCase()} ${API_PREFIX}${path} HTTP/1.1`, ...BASE_REQUESTS].join('\r\n'),
-        'utf8'
-    );
-
-    return Buffer.concat(
-        [isFirst ? '' : '\n', `${ammo.length} ${method}_request\n`, ammo, '\n'].map((it) =>
-            Buffer.isBuffer(it) ? it : Buffer.from(it)
-        )
-    );
+function makeRequest(path: string, method: 'get' | 'delete') {
+    return Buffer.from(JSON.stringify({
+        method,
+        path: `${API_PREFIX}${path}`
+    }) + '\n', 'utf8');
 }
 
-function makePostRequest(path: string, rawBody: unknown, isFirst: boolean) {
-    const body = JSON.stringify(rawBody);
-
-    const ammo = Buffer.from(
-        [`POST ${API_PREFIX}${path} HTTP/1.1`, ...BASE_REQUESTS, `Content-Length: ${body.length}`, '', body].join(
-            '\r\n'
-        ),
-        'utf8'
-    );
-
-    return Buffer.concat(
-        [isFirst ? '' : '\n', `${ammo.length} post_request\n`, ammo, '\n'].map((it) =>
-            Buffer.isBuffer(it) ? it : Buffer.from(it)
-        )
-    );
+function makePostRequest(path: string, body: unknown) {
+    return Buffer.from(JSON.stringify({
+        method: 'post',
+        path: `${API_PREFIX}${path}`,
+        body
+    }) + '\n', 'utf8');
 }
 
 async function makeCatalogAmmo() {
@@ -90,11 +68,11 @@ async function makeCatalogAmmo() {
         range(0, max),
         async (i) => {
             if (i % 6 === 0) {
-                buffer.push(makeRequest('/catalog/dictionary', 'get', i === 0));
+                buffer.push(makeRequest('/catalog/dictionary', 'get'));
             } else {
                 const item = await TestFactory.getRandomCatalogItem();
 
-                buffer.push(makeRequest(`/catalog/item/${item.publicId}`, 'get', i === 0));
+                buffer.push(makeRequest(`/catalog/item/${item.publicId}`, 'get'));
             }
 
             console.log(`catalog ammo ${i}/${max}`);
@@ -106,42 +84,51 @@ async function makeCatalogAmmo() {
 }
 
 async function makeSearchAmmo() {
-    const buffer: Buffer[] = [];
+    let buffer: Buffer[] = [];
     const max = 10_000;
 
     await pMap(
         range(0, max),
         async (i) => {
-            if (i % 3 === 0) {
-                const word = [
-                    ALPHABET[random(0, ALPHABET.length - 1)],
-                    ALPHABET[random(0, ALPHABET.length - 1)],
-                    ALPHABET[random(0, ALPHABET.length - 1)]
-                ];
+            const word = [
+                ALPHABET[random(0, ALPHABET.length - 1)],
+                ALPHABET[random(0, ALPHABET.length - 1)],
+                ALPHABET[random(0, ALPHABET.length - 1)]
+            ];
 
-                buffer.push(makeRequest(`/search/full_text?query=${word.join('')}`, 'get', i === 0));
-            } else {
-                const [pet, good, brand] = await TestFactory.getRandomDictionary();
-                const min = random(100, 10000);
+            buffer.push(makeRequest(`/search/full_text?query=${word.join('')}`, 'get'));
 
-                buffer.push(
-                    makePostRequest(
-                        '/search/base',
-                        {
-                            limit: random(10, 30),
-                            offset: random(0, 120),
-                            petCode: pet.code,
-                            brandCode: brand.code,
-                            goodCode: good.code,
-                            cost: {
-                                min,
-                                max: random(min, 100000)
-                            }
-                        },
-                        i === 0
-                    )
-                );
-            }
+            console.log(`full text search ammo ${i}/${max}`);
+        },
+        {concurrency: 10}
+    );
+
+    await fs.promises.writeFile(path.resolve('./temp/full-text-search-ammo.txt'), Buffer.concat(buffer));
+
+    buffer = [];
+
+    await pMap(
+        range(0, max),
+        async (i) => {
+            const [pet, good, brand] = await TestFactory.getRandomDictionary();
+            const min = random(100, 10000);
+
+            buffer.push(
+                makePostRequest(
+                    '/search/base',
+                    {
+                        limit: random(10, 30),
+                        offset: random(0, 120),
+                        petCode: pet.code,
+                        brandCode: brand.code,
+                        goodCode: good.code,
+                        cost: {
+                            min,
+                            max: random(min, 100000)
+                        }
+                    }
+                )
+            );
 
             console.log(`search ammo ${i}/${max}`);
         },
@@ -167,25 +154,23 @@ async function makeOrderAmmo() {
                         {
                             phone: user.phone,
                             code: Math.random() > 0.5 ? random(1000, 9999) : user.lastSmsCode
-                        },
-                        i === 0
+                        }
                     ),
                     makePostRequest(
                         '/sms/send_code',
                         {
                             phone: Math.random() > 0.5 ? random(1000000, 9999999) : user.phone
-                        },
-                        i === 0
+                        }
                     )
                 );
             } else if (i % 51 === 0) {
                 const order = await TestFactory.getRandomOrder();
 
-                buffer.push(makeRequest(`/order/${order.publicId}`, 'delete', i === 0));
+                buffer.push(makeRequest(`/order/${order.publicId}`, 'delete'));
             } else if (i % 4 === 0) {
                 const order = await TestFactory.getRandomOrder();
 
-                buffer.push(makeRequest(`/order/${order.publicId}`, 'get', i === 0));
+                buffer.push(makeRequest(`/order/${order.publicId}`, 'get'));
             } else if (i % 3 === 0) {
                 const catalogItem = await TestFactory.getRandomCatalogItem();
 
@@ -198,8 +183,7 @@ async function makeOrderAmmo() {
                                 cost: random(100, 10000),
                                 quantity: random(1, 99)
                             }))
-                        },
-                        i === 0
+                        }
                     )
                 );
             } else {
@@ -223,8 +207,7 @@ async function makeOrderAmmo() {
                                 cost: item.cost,
                                 quantity: 1
                             }))
-                        },
-                        i === 0
+                        }
                     )
                 );
             }

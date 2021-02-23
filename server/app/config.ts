@@ -36,7 +36,7 @@ export interface Config {
 const production: Config = {
     'logger.colorize': false,
     'localtunnel.enable': false,
-    'logger.db.level': 'all',
+    'logger.db.level': ['error'],
     'logger.level': 'info',
     'cors.allowedOrigins': [],
     'header.requestId': 'x-request-id',
@@ -75,6 +75,7 @@ const development: Config = {
     'localtunnel.enable': true,
     'logger.colorize': true,
     'logger.level': 'silly',
+    'logger.db.level': 'all',
     'cors.allowedOrigins': null,
     'csrf.enable': false,
     'app.host': 'https://petstore.loca.lt',

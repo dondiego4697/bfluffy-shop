@@ -4,6 +4,7 @@ export const commands = {
 
     'db:stress:fill': 'server/@cli/api/db/stress/fill',
     'db:stress:ammo': 'server/@cli/api/db/stress/ammo',
+    'db:stress:fire': 'server/@cli/api/db/stress/fire',
 
     'server:compile': 'server/@cli/api/server/compile',
     'server:dev': 'server/@cli/api/server/dev',
