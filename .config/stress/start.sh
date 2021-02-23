@@ -8,7 +8,12 @@ envsubst \
     < /config-templates/supervisord.template.conf \
     > /etc/supervisor/conf.d/supervisord.conf
 
+echo "local   replication     all                                     trust" >> /etc/postgresql/12/main/pg_hba.conf
+echo "host    all             all             0.0.0.0/0               md5" >> /etc/postgresql/12/main/pg_hba.conf
+echo "listen_addresses = '*'" >> /etc/postgresql/12/main/postgresql.conf
+
 /etc/init.d/postgresql start
+
 sudo -u postgres psql -c '\x' -c "ALTER USER postgres WITH PASSWORD 'password';"
 sudo -u postgres psql -c '\x' -c "UPDATE pg_database SET datistemplate=FALSE WHERE datname='template1'"
 sudo -u postgres psql -c '\x' -c "DROP DATABASE template1"
@@ -18,7 +23,6 @@ sudo -u postgres psql -c '\x' -c "CREATE DATABASE petstore WITH ENCODING 'UTF8' 
 
 cd /usr/local/app
 npx ts-node ./node_modules/typeorm/cli.js migration:run -c stress
-shop stress:fill-db -c
 
 /etc/init.d/elasticsearch start
 

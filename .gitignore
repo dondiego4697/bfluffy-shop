@@ -3,3 +3,9 @@
 node_modules/
 out
 .env
+*.DS_Store
+
+server/tests/stress/token.txt
+tank_errors.log
+logs
+ammo.stpd*

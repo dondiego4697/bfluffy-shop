@@ -2,7 +2,8 @@ export const commands = {
     lint: 'server/@cli/api/lint',
     tests: 'server/@cli/api/tests',
 
-    'stress:fill-db': 'server/@cli/api/stress/fill-db',
+    'db:stress:fill': 'server/@cli/api/db/stress/fill',
+    'db:stress:ammo': 'server/@cli/api/db/stress/ammo',
 
     'server:compile': 'server/@cli/api/server/compile',
     'server:dev': 'server/@cli/api/server/dev',

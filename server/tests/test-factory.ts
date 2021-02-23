@@ -34,13 +34,17 @@ async function createBrand() {
     return manager.findOneOrFail(Brand, brand.id);
 }
 
-async function createPetCategory() {
+interface CreatePetParams {
+    code?: string;
+}
+
+async function createPetCategory(params: CreatePetParams = {}) {
     const name = faker.name.title() + Math.random();
     const connection = await dbManager.getConnection();
     const {manager} = connection.getRepository(PetCategory);
 
     const pet = manager.create(PetCategory, {
-        code: slugify(name),
+        code: params.code || slugify(name),
         displayName: name
     });
 
@@ -373,6 +377,82 @@ async function getCsrfToken(url: string) {
     return result[1];
 }
 
+async function getRandomCatalogItem() {
+    const connection = await dbManager.getConnection();
+
+    return connection
+        .createQueryBuilder()
+        .select(DbTable.CATALOG_ITEM)
+        .from(CatalogItem, DbTable.CATALOG_ITEM)
+        .orderBy('RANDOM()')
+        .limit(1)
+        .getOneOrFail();
+}
+
+async function getRandomUser() {
+    const connection = await dbManager.getConnection();
+
+    return connection
+        .createQueryBuilder()
+        .select(DbTable.USER)
+        .from(User, DbTable.USER)
+        .orderBy('RANDOM()')
+        .limit(1)
+        .getOneOrFail();
+}
+
+async function getRandomOrder() {
+    const connection = await dbManager.getConnection();
+
+    return connection
+        .createQueryBuilder()
+        .select(DbTable.ORDER)
+        .from(Order, DbTable.ORDER)
+        .orderBy('RANDOM()')
+        .limit(1)
+        .getOneOrFail();
+}
+
+async function getRandomStorageItem(limit = 1) {
+    const connection = await dbManager.getConnection();
+
+    return connection
+        .getRepository(Storage)
+        .createQueryBuilder(DbTable.STORAGE)
+        .innerJoinAndSelect(`${DbTable.STORAGE}.catalogItem`, DbTable.CATALOG_ITEM)
+        .orderBy('RANDOM()')
+        .limit(limit)
+        .getMany();
+}
+
+async function getRandomDictionary() {
+    const connection = await dbManager.getConnection();
+
+    return Promise.all([
+        connection
+            .createQueryBuilder()
+            .select(DbTable.PET_CATEGORY)
+            .from(PetCategory, DbTable.PET_CATEGORY)
+            .orderBy('RANDOM()')
+            .limit(1)
+            .getOneOrFail(),
+        connection
+            .createQueryBuilder()
+            .select(DbTable.GOOD_CATEGORY)
+            .from(GoodCategory, DbTable.GOOD_CATEGORY)
+            .orderBy('RANDOM()')
+            .limit(1)
+            .getOneOrFail(),
+        connection
+            .createQueryBuilder()
+            .select(DbTable.BRAND)
+            .from(Brand, DbTable.BRAND)
+            .orderBy('RANDOM()')
+            .limit(1)
+            .getOneOrFail()
+    ]);
+}
+
 export const TestFactory = {
     createBrand,
     createPetCategory,
@@ -387,5 +467,11 @@ export const TestFactory = {
     getAllStorageItems,
     getAllOrders,
     getAllUsers,
-    getCsrfToken
+    getCsrfToken,
+    // random
+    getRandomCatalogItem,
+    getRandomDictionary,
+    getRandomUser,
+    getRandomOrder,
+    getRandomStorageItem
 };
