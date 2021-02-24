@@ -45,34 +45,26 @@ const ALPHABET = [
     'я'
 ];
 
-function makeRequest(path: string, method: 'get' | 'delete') {
-    return Buffer.from(JSON.stringify({
-        method,
-        path: `${API_PREFIX}${path}`
-    }) + '\n', 'utf8');
-}
+const CSV_HEADERS = ['path', 'method', 'payload'].join(';');
 
-function makePostRequest(path: string, body: unknown) {
-    return Buffer.from(JSON.stringify({
-        method: 'post',
-        path: `${API_PREFIX}${path}`,
-        body
-    }) + '\n', 'utf8');
+function makeRequest(path: string, method: 'get' | 'delete' | 'post', payload?: unknown) {
+    return [`${API_PREFIX}${path}`, method.toUpperCase(), payload ? JSON.stringify(payload) : ''].join(';');
 }
 
 async function makeCatalogAmmo() {
-    const buffer: Buffer[] = [];
+    const requests: string[] = [CSV_HEADERS];
     const max = 2_000;
+    const file = path.resolve('./temp/catalog-ammo.csv');
 
     await pMap(
         range(0, max),
         async (i) => {
             if (i % 6 === 0) {
-                buffer.push(makeRequest('/catalog/dictionary', 'get'));
+                requests.push(makeRequest('/catalog/dictionary', 'get'));
             } else {
                 const item = await TestFactory.getRandomCatalogItem();
 
-                buffer.push(makeRequest(`/catalog/item/${item.publicId}`, 'get'));
+                requests.push(makeRequest(`/catalog/item/${item.publicId}`, 'get'));
             }
 
             console.log(`catalog ammo ${i}/${max}`);
@@ -80,12 +72,13 @@ async function makeCatalogAmmo() {
         {concurrency: 10}
     );
 
-    await fs.promises.writeFile(path.resolve('./temp/catalog-ammo.txt'), Buffer.concat(buffer));
+    await fs.promises.appendFile(file, requests.join('\n'));
 }
 
-async function makeSearchAmmo() {
-    let buffer: Buffer[] = [];
+async function makeFullTextSearchAmmo() {
+    const requests: string[] = [CSV_HEADERS];
     const max = 10_000;
+    const file = path.resolve('./temp/full-text-search-ammo.csv');
 
     await pMap(
         range(0, max),
@@ -96,16 +89,20 @@ async function makeSearchAmmo() {
                 ALPHABET[random(0, ALPHABET.length - 1)]
             ];
 
-            buffer.push(makeRequest(`/search/full_text?query=${word.join('')}`, 'get'));
+            requests.push(makeRequest(`/search/full_text?query=${word.join('')}`, 'get'));
 
             console.log(`full text search ammo ${i}/${max}`);
         },
         {concurrency: 10}
     );
 
-    await fs.promises.writeFile(path.resolve('./temp/full-text-search-ammo.txt'), Buffer.concat(buffer));
+    await fs.promises.writeFile(file, requests.join('\n'));
+}
 
-    buffer = [];
+async function makeSearchAmmo() {
+    const requests: string[] = [CSV_HEADERS];
+    const max = 10_000;
+    const file = path.resolve('./temp/search-ammo.csv');
 
     await pMap(
         range(0, max),
@@ -113,21 +110,18 @@ async function makeSearchAmmo() {
             const [pet, good, brand] = await TestFactory.getRandomDictionary();
             const min = random(100, 10000);
 
-            buffer.push(
-                makePostRequest(
-                    '/search/base',
-                    {
-                        limit: random(10, 30),
-                        offset: random(0, 120),
-                        petCode: pet.code,
-                        brandCode: brand.code,
-                        goodCode: good.code,
-                        cost: {
-                            min,
-                            max: random(min, 100000)
-                        }
+            requests.push(
+                makeRequest('/search/base', 'post', {
+                    limit: random(10, 30),
+                    offset: random(0, 120),
+                    petCode: pet.code,
+                    brandCode: brand.code,
+                    goodCode: good.code,
+                    cost: {
+                        min,
+                        max: random(min, 100000)
                     }
-                )
+                })
             );
 
             console.log(`search ammo ${i}/${max}`);
@@ -135,12 +129,13 @@ async function makeSearchAmmo() {
         {concurrency: 10}
     );
 
-    await fs.promises.writeFile(path.resolve('./temp/search-ammo.txt'), Buffer.concat(buffer));
+    await fs.promises.writeFile(file, requests.join('\n'));
 }
 
 async function makeOrderAmmo() {
-    const buffer: Buffer[] = [];
+    const requests: string[] = [CSV_HEADERS];
     const max = 10_000;
+    const file = path.resolve('./temp/order-ammo.csv');
 
     await pMap(
         range(0, max),
@@ -148,43 +143,34 @@ async function makeOrderAmmo() {
             if (i % 5 === 0) {
                 const user = await TestFactory.getRandomUser();
 
-                buffer.push(
-                    makePostRequest(
-                        '/sms/verify_code',
-                        {
-                            phone: user.phone,
-                            code: Math.random() > 0.5 ? random(1000, 9999) : user.lastSmsCode
-                        }
-                    ),
-                    makePostRequest(
-                        '/sms/send_code',
-                        {
-                            phone: Math.random() > 0.5 ? random(1000000, 9999999) : user.phone
-                        }
-                    )
+                requests.push(
+                    makeRequest('/sms/verify_code', 'post', {
+                        phone: user.phone,
+                        code: Math.random() > 0.5 ? random(1000, 9999) : user.lastSmsCode
+                    }),
+                    makeRequest('/sms/send_code', 'post', {
+                        phone: Math.random() > 0.5 ? random(1000000, 9999999) : user.phone
+                    })
                 );
             } else if (i % 51 === 0) {
                 const order = await TestFactory.getRandomOrder();
 
-                buffer.push(makeRequest(`/order/${order.publicId}`, 'delete'));
+                requests.push(makeRequest(`/order/${order.publicId}`, 'delete'));
             } else if (i % 4 === 0) {
                 const order = await TestFactory.getRandomOrder();
 
-                buffer.push(makeRequest(`/order/${order.publicId}`, 'get'));
+                requests.push(makeRequest(`/order/${order.publicId}`, 'get'));
             } else if (i % 3 === 0) {
                 const catalogItem = await TestFactory.getRandomCatalogItem();
 
-                buffer.push(
-                    makePostRequest(
-                        '/order/check_cart',
-                        {
-                            goods: range(1, 4).map(() => ({
-                                publicId: catalogItem.publicId,
-                                cost: random(100, 10000),
-                                quantity: random(1, 99)
-                            }))
-                        }
-                    )
+                requests.push(
+                    makeRequest('/order/check_cart', 'post', {
+                        goods: range(1, 4).map(() => ({
+                            publicId: catalogItem.publicId,
+                            cost: random(100, 10000),
+                            quantity: random(1, 99)
+                        }))
+                    })
                 );
             } else {
                 const [user, storageItems] = await Promise.all([
@@ -192,23 +178,20 @@ async function makeOrderAmmo() {
                     TestFactory.getRandomStorageItem(random(1, 4))
                 ]);
 
-                buffer.push(
-                    makePostRequest(
-                        '/order/create',
-                        {
-                            phone: user.phone,
-                            delivery: {
-                                address: Math.random(),
-                                date: moment().format('X'),
-                                comment: Math.random()
-                            },
-                            goods: storageItems.map((item) => ({
-                                publicId: item.catalogItem.publicId,
-                                cost: item.cost,
-                                quantity: 1
-                            }))
-                        }
-                    )
+                requests.push(
+                    makeRequest('/order/create', 'post', {
+                        phone: user.phone,
+                        delivery: {
+                            address: String(Math.random()),
+                            date: moment().format('X'),
+                            comment: String(Math.random())
+                        },
+                        goods: storageItems.map((item) => ({
+                            publicId: item.catalogItem.publicId,
+                            cost: item.cost,
+                            quantity: 1
+                        }))
+                    })
                 );
             }
 
@@ -217,11 +200,12 @@ async function makeOrderAmmo() {
         {concurrency: 10}
     );
 
-    await fs.promises.writeFile(path.resolve('./temp/order-ammo.txt'), Buffer.concat(buffer));
+    await fs.promises.writeFile(file, requests.join('\n'));
 }
 
 export async function handle() {
     await makeCatalogAmmo();
+    await makeFullTextSearchAmmo();
     await makeSearchAmmo();
     await makeOrderAmmo();
 }
