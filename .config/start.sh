@@ -9,4 +9,8 @@ envsubst \
     < /config-templates/supervisord.template.conf \
     > /etc/supervisor/conf.d/supervisord.conf
 
+/etc/init.d/elasticsearch start
+
+sleep 30
+
 /usr/bin/supervisord
