@@ -1,12 +1,10 @@
 import * as express from 'express';
 import {router as orderRouter} from 'app/api/v1/routers/order';
 import {router as searchRouter} from 'app/api/v1/routers/search';
-import {router as smsRouter} from 'app/api/v1/routers/sms';
 import {router as catalogRouter} from 'app/api/v1/routers/catalog';
 
 export const router = express
     .Router()
     .use('/catalog', catalogRouter)
-    .use('/sms', smsRouter)
-    .use('/order', orderRouter)
-    .use('/search', searchRouter);
+    .use('/search', searchRouter)
+    .use('/order', orderRouter);

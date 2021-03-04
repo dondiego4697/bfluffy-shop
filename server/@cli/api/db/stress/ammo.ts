@@ -140,23 +140,7 @@ async function makeOrderAmmo() {
     await pMap(
         range(0, max),
         async (i) => {
-            if (i % 5 === 0) {
-                const user = await TestFactory.getRandomUser();
-
-                requests.push(
-                    makeRequest('/sms/verify_code', 'post', {
-                        phone: user.phone,
-                        code: Math.random() > 0.5 ? random(1000, 9999) : user.lastSmsCode
-                    }),
-                    makeRequest('/sms/send_code', 'post', {
-                        phone: Math.random() > 0.5 ? random(1000000, 9999999) : user.phone
-                    })
-                );
-            } else if (i % 51 === 0) {
-                const order = await TestFactory.getRandomOrder();
-
-                requests.push(makeRequest(`/order/${order.publicId}`, 'delete'));
-            } else if (i % 4 === 0) {
+            if (i % 4 === 0) {
                 const order = await TestFactory.getRandomOrder();
 
                 requests.push(makeRequest(`/order/${order.publicId}`, 'get'));

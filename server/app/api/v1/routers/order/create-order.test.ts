@@ -38,7 +38,6 @@ describe(`POST ${PATH}`, () => {
     const context = new TestContext();
     let url: string;
     let user: User;
-    let csrf: string;
 
     beforeAll(async () => {
         url = await context.getServerAddress();
@@ -51,7 +50,6 @@ describe(`POST ${PATH}`, () => {
 
     beforeEach(async () => {
         await context.beforeEach();
-        csrf = await TestFactory.getCsrfToken(url);
         user = await TestFactory.createUser();
     });
 
@@ -75,7 +73,6 @@ describe(`POST ${PATH}`, () => {
             responseType: 'json',
             throwHttpErrors: false,
             json: {
-                csrf,
                 phone: user.phone,
                 delivery: {
                     address: 'address',
@@ -120,7 +117,6 @@ describe(`POST ${PATH}`, () => {
             responseType: 'json',
             throwHttpErrors: false,
             json: {
-                csrf,
                 phone: user.phone,
                 delivery: {
                     address: 'address',
@@ -145,7 +141,6 @@ describe(`POST ${PATH}`, () => {
             responseType: 'json',
             throwHttpErrors: false,
             json: {
-                csrf,
                 phone: 7988112312,
                 delivery: {
                     address: 'address',
@@ -175,7 +170,6 @@ describe(`POST ${PATH}`, () => {
             responseType: 'json',
             throwHttpErrors: false,
             json: {
-                csrf,
                 phone: user.phone,
                 delivery: {
                     address: 'address',
@@ -205,7 +199,6 @@ describe(`POST ${PATH}`, () => {
             responseType: 'json',
             throwHttpErrors: false,
             json: {
-                csrf,
                 phone: user.phone,
                 delivery: {
                     address: 'address',

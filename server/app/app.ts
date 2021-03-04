@@ -17,7 +17,6 @@ import {cors} from 'app/middleware/cors';
 import {requestId} from 'app/middleware/request-id';
 import {logger as loggerMiddleware} from 'app/middleware/logger';
 import {router as v1} from 'app/api/v1';
-import {router as bot} from 'app/api/bot';
 import {ClientError} from '$error/error';
 import {config} from 'app/config';
 import {getTelegramProvider} from '$telegram/provider';
@@ -41,7 +40,6 @@ export const app = express()
     .get('/ping', ping)
     .use(staticRouter)
     .use('/api/v1', v1)
-    .use('/bot', bot)
     .get('/*', renderHTML)
     .use((_req, _res, next) => next(Boom.notFound('endpoint not found')))
     // eslint-disable-next-line

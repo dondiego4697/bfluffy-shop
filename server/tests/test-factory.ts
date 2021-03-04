@@ -2,7 +2,6 @@
 import faker from 'faker';
 import slugify from 'slugify';
 import pMap from 'p-map';
-import got from 'got';
 
 import {dbManager} from 'app/lib/db-manager';
 import {
@@ -318,22 +317,12 @@ async function createOrderPosition(params: CreateOrderPositionParams) {
     return orderPositions;
 }
 
-interface CreateUserParams {
-    lastSmsCodeAt?: Date;
-    telegramUserId?: number;
-    telegramEnable?: boolean;
-}
-
-async function createUser(params: CreateUserParams = {}) {
+async function createUser() {
     const connection = await dbManager.getConnection();
     const {manager} = connection.getRepository(User);
 
     const user = manager.create(User, {
-        phone: [faker.random.number(), faker.random.number(), faker.random.number()].join(''),
-        lastSmsCode: faker.random.number(),
-        lastSmsCodeAt: params.lastSmsCodeAt,
-        telegramUserId: params.telegramUserId,
-        telegramEnable: params.telegramEnable
+        phone: [faker.random.number(), faker.random.number(), faker.random.number()].join('')
     });
 
     await manager.save(user);
@@ -357,24 +346,6 @@ async function getAllOrders() {
     const connection = await dbManager.getConnection();
 
     return connection.createQueryBuilder().select(DbTable.ORDER).from(Order, DbTable.ORDER).getMany();
-}
-
-async function getCsrfToken(url: string) {
-    const user = await TestFactory.createUser();
-
-    const {headers} = await got.post<any>(`${url}/api/v1/sms/verify_code`, {
-        responseType: 'json',
-        throwHttpErrors: false,
-        json: {
-            phone: user.phone,
-            code: user.lastSmsCode
-        }
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const result = /csrf_token=(.+?);/gim.exec(headers['set-cookie']![0]) as string[];
-
-    return result[1];
 }
 
 async function getRandomCatalogItem() {
@@ -467,7 +438,6 @@ export const TestFactory = {
     getAllStorageItems,
     getAllOrders,
     getAllUsers,
-    getCsrfToken,
     // random
     getRandomCatalogItem,
     getRandomDictionary,

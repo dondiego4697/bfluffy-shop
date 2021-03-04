@@ -1,11 +1,10 @@
 import * as express from 'express';
 import * as Joi from '@hapi/joi';
-import {csrf} from 'app/middleware/csrf';
+import ratelimiter from 'express-rate-limit';
 import {bodyValidate} from 'app/middleware/validate';
 import {createOrder} from 'app/api/v1/routers/order/create-order';
 import {checkCart} from 'app/api/v1/routers/order/check-cart';
 import {getOrder} from 'app/api/v1/routers/order/get-order';
-import {cancelOrder} from 'app/api/v1/routers/order/cancel-order';
 
 const goodSchema = Joi.object({
     publicId: Joi.string().required(),
@@ -31,6 +30,10 @@ export const router = express
     .Router()
     .get('/:public_id', getOrder)
     .post('/check_cart', bodyValidate(checkCartSchema, {allowUnknown: true}), checkCart)
-    .use(csrf)
-    .post('/create', bodyValidate(createOrderSchema, {allowUnknown: true}), createOrder)
-    .delete('/:public_id', cancelOrder);
+    .use(
+        ratelimiter({
+            windowMs: 24 * 60 * 60 * 1000, // 1d
+            max: 10 // Максимум 10 запросов за 1d на IP
+        })
+    )
+    .post('/create', bodyValidate(createOrderSchema, {allowUnknown: true}), createOrder);

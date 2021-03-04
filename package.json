@@ -1,5 +1,5 @@
 {
-   "name": "shop",
+   "name": "bfluffy",
    "version": "0.0.1",
    "scripts": {},
    "devDependencies": {
@@ -66,11 +66,11 @@
       "winston": "3.3.3"
    },
    "bin": {
-      "shop": "./cli.js"
+      "bfluffy": "./cli.js"
    },
    "husky": {
       "hooks": {
-         "pre-commit": "shop lint"
+         "pre-commit": "bfluffy lint"
       }
    }
 }
