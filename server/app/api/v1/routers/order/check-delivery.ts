@@ -28,7 +28,7 @@ export const checkDelivery = wrap<Request, Response>(async (req, res) => {
         .getMany();
 
     const data = {
-        enable: areas.length > 0
+        isInAvailableArea: areas.length > 0
     };
 
     requestCache.set(req, data, 30); // 30 s

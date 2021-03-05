@@ -41,6 +41,18 @@ describe(`POST ${PATH}`, () => {
         const confirmedOrder = orders.find((item) => item.publicId === body.publicId);
 
         expect(confirmedOrder?.status).toBe('CONFIRMED');
+
+        // Проверяем триггер, что в order_status_history добавился новый статус
+        const orderStatusHistory = await TestFactory.getAllOrderStatusHistory();
+        const orderStatusHistoryExpected = orderStatusHistory.filter((it) => it.orderId === order?.id);
+
+        expect(orderStatusHistoryExpected).toMatchObject([
+            {
+                orderId: order?.id,
+                resolution: null,
+                status: 'CONFIRMED'
+            }
+        ]);
     });
 
     it('should throw client error if order already not created', async () => {

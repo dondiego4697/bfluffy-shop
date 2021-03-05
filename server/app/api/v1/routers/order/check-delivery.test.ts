@@ -33,7 +33,7 @@ describe(`POST ${PATH}`, () => {
 
         expect(statusCode).toBe(200);
         expect(body).toEqual({
-            enable: false
+            isInAvailableArea: false
         });
     });
 
@@ -51,7 +51,7 @@ describe(`POST ${PATH}`, () => {
 
         expect(statusCode).toBe(200);
         expect(body).toEqual({
-            enable: true
+            isInAvailableArea: true
         });
     });
 });
