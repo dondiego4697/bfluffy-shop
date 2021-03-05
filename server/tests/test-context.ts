@@ -41,6 +41,8 @@ export class TestContext {
 
     protected async clearDb() {
         const tables = [
+            DbTable.DELIVERY_AREA,
+            DbTable.ORDER_STATUS_HISTORY,
             DbTable.ORDER_POSITION,
             DbTable.ORDER,
             DbTable.USER,

@@ -6,7 +6,7 @@ import {TestFactory} from 'tests/test-factory';
 
 const PATH = '/api/v1/search/base';
 
-describe(PATH, () => {
+describe(`POST ${PATH}`, () => {
     const context = new TestContext();
     let url: string;
 

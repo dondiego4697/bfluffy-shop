@@ -1,16 +1,6 @@
 import typeorm, {createConnection} from 'typeorm';
 import {config} from 'app/config';
-import {
-    Brand,
-    Catalog,
-    CatalogItem,
-    GoodCategory,
-    OrderPosition,
-    Order,
-    PetCategory,
-    Storage,
-    User
-} from '$db-entity/entities';
+import * as entities from '$db-entity/entities';
 
 class DbManager {
     protected connection: typeorm.Connection;
@@ -35,7 +25,7 @@ class DbManager {
                     database: config.db.database
                 }))
             },
-            entities: [Brand, Catalog, CatalogItem, GoodCategory, OrderPosition, Order, PetCategory, Storage, User],
+            entities: Object.values(entities),
             logging: config['logger.db.level'],
             maxQueryExecutionTime: 5000,
             extra: {

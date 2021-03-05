@@ -7,5 +7,8 @@ export enum DbTable {
     PET_CATEGORY = 'pet_category',
     STORAGE = 'storage',
     ORDER = 'orders',
-    ORDER_POSITION = 'order_position'
+    ORDER_POSITION = 'order_position',
+    ORDER_STATUS_HISTORY = 'order_status_history',
+    DELIVERY_AREA = 'delivery_area',
+    PAYMENT = 'payment'
 }

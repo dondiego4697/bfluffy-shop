@@ -19,7 +19,6 @@ import {logger as loggerMiddleware} from 'app/middleware/logger';
 import {router as v1} from 'app/api/v1';
 import {ClientError} from '$error/error';
 import {config} from 'app/config';
-import {getTelegramProvider} from '$telegram/provider';
 
 const bodyParserJson = bodyParser.json({
     limit: '5mb',
@@ -62,10 +61,6 @@ if (!module.parent) {
     const port = Number(process.env.NODEJS_PORT) || 8080;
 
     assert(port, 'no port provided for the application to listen to');
-
-    const telegramProvider = getTelegramProvider();
-
-    telegramProvider.setWebhook();
 
     if (config['localtunnel.enable']) {
         localtunnel({port, subdomain: 'petstore'}).then((tunnel) => {

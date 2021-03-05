@@ -34,6 +34,15 @@ async function createBase() {
     return {storageItems, catalogItems};
 }
 
+function nockSms(phone: string) {
+    nock(config['sms-boom.host'])
+        .get('/messages/v2/send')
+        .query(
+            (q: any) => q.phone === phone && q.text.includes(`Ваш заказ успешно создан: ${config['app.host']}/order/`)
+        )
+        .reply(200);
+}
+
 describe(`POST ${PATH}`, () => {
     const context = new TestContext();
     let url: string;
@@ -61,13 +70,7 @@ describe(`POST ${PATH}`, () => {
 
         const deliveryDate = moment().add(1, 'days');
 
-        nock(config['sms-boom.host'])
-            .get('/messages/v2/send')
-            .query(
-                (q: any) =>
-                    q.phone === user.phone && q.text.includes(`Ваш заказ успешно создан: ${config['app.host']}/order/`)
-            )
-            .reply(200);
+        nockSms(user.phone);
 
         const {statusCode, body} = await got.post<any>(`${url}${PATH}`, {
             responseType: 'json',
@@ -106,6 +109,54 @@ describe(`POST ${PATH}`, () => {
         expect(storageItemExpected).toMatchObject({
             quantity: 1
         });
+
+        const orderStatusHistory = await TestFactory.getAllOrderStatusHistory();
+        const orderStatusHistoryExpected = orderStatusHistory.filter((it) => it.orderId === order?.id);
+
+        expect(orderStatusHistoryExpected).toMatchObject([
+            {
+                orderId: order?.id,
+                resolution: null,
+                status: 'CREATED'
+            }
+        ]);
+    });
+
+    it('should create user if user does not exist', async () => {
+        const phone = 7988112312;
+
+        nockSms(String(phone));
+
+        const {
+            storageItems: [storageItem],
+            catalogItems: [catalogItem]
+        } = await createBase();
+
+        const {statusCode} = await got.post<any>(`${url}${PATH}`, {
+            responseType: 'json',
+            throwHttpErrors: false,
+            json: {
+                phone,
+                delivery: {
+                    address: 'address',
+                    date: moment().format('X')
+                },
+                goods: [
+                    {
+                        publicId: catalogItem.publicId,
+                        quantity: storageItem.quantity - 1,
+                        cost: storageItem.cost
+                    }
+                ]
+            }
+        });
+
+        expect(statusCode).toBe(200);
+
+        const users = await TestFactory.getAllUsers();
+        const user = users.find((user) => user.phone === String(phone));
+
+        expect(user).not.toBeFalsy();
     });
 
     it('should return client error if storage does not exist', async () => {
@@ -134,30 +185,6 @@ describe(`POST ${PATH}`, () => {
 
         expect(statusCode).toBe(400);
         expect(body.message).toEqual('COST_OR_QUANTITY_CHANGED');
-    });
-
-    it('should return client error if user does not exist', async () => {
-        const {statusCode, body} = await got.post<any>(`${url}${PATH}`, {
-            responseType: 'json',
-            throwHttpErrors: false,
-            json: {
-                phone: 7988112312,
-                delivery: {
-                    address: 'address',
-                    date: moment().format('X')
-                },
-                goods: [
-                    {
-                        publicId: uuidv4(),
-                        quantity: 1,
-                        cost: 99.99
-                    }
-                ]
-            }
-        });
-
-        expect(statusCode).toBe(400);
-        expect(body.message).toEqual('USER_DOES_NOT_EXIST');
     });
 
     it('should return client error if cost changed', async () => {

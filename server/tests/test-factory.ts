@@ -13,7 +13,9 @@ import {
     PetCategory,
     OrderPosition,
     Storage,
-    User
+    User,
+    DeliveryArea,
+    OrderStatusHistory
 } from '$db-entity/entities';
 import {OrderStatus, OrderResolution} from '$db-entity/order';
 import {DbTable} from '$db-entity/tables';
@@ -155,6 +157,36 @@ async function createStorage(params: CreateStorageParams) {
     await manager.save(storage);
 
     return manager.findOneOrFail(Storage, storage.id);
+}
+
+interface CreateDeliveryAreaParams {
+    enable?: boolean;
+}
+
+async function createDeliveryArea(params: CreateDeliveryAreaParams = {}) {
+    const connection = await dbManager.getConnection();
+    const {manager} = connection.getRepository(DeliveryArea);
+
+    const area = manager.create(DeliveryArea, {
+        city: faker.address.city() + Math.random(),
+        district: faker.address.state() + Math.random(),
+        location: {
+            type: 'Polygon',
+            coordinates: [
+                [
+                    [1, 1],
+                    [1, 10],
+                    [10, 10],
+                    [10, 1]
+                ]
+            ]
+        },
+        enable: params.enable || false
+    });
+
+    await manager.save(area);
+
+    return manager.findOneOrFail(DeliveryArea, area.id);
 }
 
 interface CreateOrderPositionParams {
@@ -342,6 +374,16 @@ async function getAllStorageItems() {
     return connection.createQueryBuilder().select(DbTable.STORAGE).from(Storage, DbTable.STORAGE).getMany();
 }
 
+async function getAllOrderStatusHistory() {
+    const connection = await dbManager.getConnection();
+
+    return connection
+        .createQueryBuilder()
+        .select(DbTable.ORDER_STATUS_HISTORY)
+        .from(OrderStatusHistory, DbTable.ORDER_STATUS_HISTORY)
+        .getMany();
+}
+
 async function getAllOrders() {
     const connection = await dbManager.getConnection();
 
@@ -433,11 +475,13 @@ export const TestFactory = {
     createOrder,
     createOrderPosition,
     createOrderPositionOne,
+    getAllOrderStatusHistory,
     createStorage,
     createUser,
     getAllStorageItems,
     getAllOrders,
     getAllUsers,
+    createDeliveryArea,
     // random
     getRandomCatalogItem,
     getRandomDictionary,

@@ -5,7 +5,7 @@ import {TestFactory} from 'tests/test-factory';
 
 const PATH = '/api/v1/catalog/dictionary';
 
-describe(PATH, () => {
+describe(`GET ${PATH}`, () => {
     const context = new TestContext();
     let url: string;
 

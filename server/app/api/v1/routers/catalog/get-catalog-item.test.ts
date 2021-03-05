@@ -8,7 +8,7 @@ import {TestFactory} from 'tests/test-factory';
 
 const PATH = '/api/v1/catalog/item/:id';
 
-describe(PATH, () => {
+describe(`GET ${PATH}`, () => {
     const context = new TestContext();
     let url: string;
 

@@ -12,6 +12,8 @@ interface Params {
 type ClientErrorCode =
     | 'COST_OR_QUANTITY_CHANGED'
     | 'ORDER_ALREADY_FINISHED'
+    | 'ORDER_ALREADY_CONFIRMED'
+    | 'ORDER_NOT_IN_CREATED_STATUS'
     | 'SMS_SEND_FAILED'
     | 'USER_DOES_NOT_EXIST';
 

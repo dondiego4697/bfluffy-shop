@@ -1,6 +1,6 @@
 import {toFinite} from 'lodash';
 import {Entity, PrimaryGeneratedColumn, Column, OneToMany, AfterLoad, ManyToOne, JoinColumn} from 'typeorm';
-import {OrderPosition, User} from '$db-entity/entities';
+import {OrderPosition, User, OrderStatusHistory} from '$db-entity/entities';
 import {DbTable} from '$db-entity/tables';
 
 interface Data {
@@ -8,7 +8,8 @@ interface Data {
 }
 
 export enum OrderStatus {
-    CREATED = 'CREATED',
+    CREATED = 'CREATED', // создан, но не оплачен
+    CONFIRMED = 'CONFIRMED', // оплачен
     IN_DELIVERY = 'IN_DELIVERY',
     FINISHED = 'FINISHED'
 }
@@ -16,7 +17,7 @@ export enum OrderStatus {
 export enum OrderResolution {
     SUCCESS = 'SUCCESS',
     CANCELLED = 'CANCELLED', // Со стороны пользователя
-    ANNULATED = 'ANNULATED' // Со стороны нас
+    ANNULATED = 'ANNULATED' // Со стороны сервиса
 }
 
 @Entity({name: DbTable.ORDER})
@@ -32,6 +33,9 @@ export class Order {
 
     @OneToMany(() => OrderPosition, (position) => position.order)
     orderPositions: OrderPosition[];
+
+    @OneToMany(() => OrderStatusHistory, (status) => status.order)
+    orderStatusesHistory: OrderStatusHistory[];
 
     @ManyToOne(() => User, (user) => user.orders)
     @JoinColumn({name: 'user_id', referencedColumnName: 'id'})

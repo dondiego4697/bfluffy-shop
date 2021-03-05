@@ -8,7 +8,7 @@ import {config} from 'app/config';
 import {dbManager} from 'app/lib/db-manager';
 import {OrderStatus} from 'db-entity/order';
 import {SmsProvider} from '$sms/provider';
-import {Order, OrderPosition, Storage, User} from '$db-entity/entities';
+import {Order, OrderPosition, OrderStatusHistory, Storage, User} from '$db-entity/entities';
 import {DbTable} from '$db-entity/tables';
 import {ClientError} from '$error/error';
 
@@ -34,16 +34,20 @@ export const createOrder = wrap<Request, Response>(async (req, res) => {
     const orderPublicId = await connection.transaction(async (manager) => {
         const {manager: userManager} = manager.getRepository(User);
 
-        const user = await userManager.findOne(User, {phone: String(phone)});
+        let user = await userManager.findOne(User, {phone: String(phone)});
 
         if (!user) {
-            throw new ClientError('USER_DOES_NOT_EXIST', {meta: {goods, delivery, phone}});
+            user = await userManager.create(User, {
+                phone: String(phone)
+            });
+
+            await userManager.save(user);
         }
 
         const {manager: orderManager} = manager.getRepository(Order);
 
         const orderRaw = orderManager.create(Order, {
-            data: {}, // TODO sdek
+            data: {}, // TODO delivery, payment
             userId: user.id,
             clientPhone: String(phone),
             deliveryAddress: delivery.address,
@@ -164,6 +168,18 @@ export const createOrder = wrap<Request, Response>(async (req, res) => {
                     };
                 })
             )
+            .execute();
+
+        await manager
+            .createQueryBuilder()
+            .insert()
+            .into(OrderStatusHistory)
+            .values([
+                {
+                    orderId: order.id,
+                    status: OrderStatus.CREATED
+                }
+            ])
             .execute();
 
         return order.publicId;
